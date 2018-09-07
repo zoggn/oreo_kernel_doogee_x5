@@ -712,5 +712,5 @@
 };
 /* CONSYS end */
 
-#include <k80_bsp/cust.dtsi>
+#include <x5/cust.dtsi>
 /*End of this file, DO NOT ADD ANYTHING HERE*/
