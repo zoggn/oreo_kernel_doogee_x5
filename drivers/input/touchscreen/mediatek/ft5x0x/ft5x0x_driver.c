@@ -321,7 +321,7 @@ static ssize_t store_scp_ctrl(struct device *dev, struct device_attribute *attr,
 				struct Touch_IPI_Packet ipi_pkt;
 
 				ipi_pkt.cmd = IPI_COMMAND_AS_CUST_PARAMETER;
-			    ipi_pkt.param.tcs.i2c_num = 0;/* shuold be modify according your hardware design*/
+			    ipi_pkt.param.tcs.i2c_num = 1;/* shuold be modify according your hardware design*/
 			ipi_pkt.param.tcs.int_num = get_hardware_irq(touch_irq);
 				ipi_pkt.param.tcs.io_int = tpd_int_gpio_number;
 			ipi_pkt.param.tcs.io_rst = tpd_rst_gpio_number;
@@ -952,7 +952,7 @@ static void tpd_suspend(struct device *h)
 				struct Touch_IPI_Packet ipi_pkt;
 
 				ipi_pkt.cmd = IPI_COMMAND_AS_CUST_PARAMETER;
-				ipi_pkt.param.tcs.i2c_num = 0;/* shuold be modify according your hardware design*/
+				ipi_pkt.param.tcs.i2c_num = 1;/* shuold be modify according your hardware design*/
 				ipi_pkt.param.tcs.int_num = get_hardware_irq(touch_irq);
 				ipi_pkt.param.tcs.io_int = tpd_int_gpio_number;
 				ipi_pkt.param.tcs.io_rst = tpd_rst_gpio_number;

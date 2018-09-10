@@ -360,7 +360,7 @@
 /*ACCDET END*/
 /* TOUCH GPIO standardization */
 &touch {
-	tpd-resolution = <540 960>;
+	tpd-resolution = <720 1280>;
 	use-tpd-button = <0>;
 	tpd-key-num = <3>;
 	tpd-key-local= <139 172 158 0>;
@@ -382,7 +382,12 @@
 };
 &pio {
 	ctp_pins_default: toucheint5default {
-	};
+		pins_cmd_dat {
+			pins = <PINMUX_GPIO5__FUNC_EINT5>;
+			slew-rate = <0>;
+			bias-disable;
+		};
+    };
 	ctp_pins_eint_as_int: toucheint@5 {
 		pins_cmd_dat {
 			pins = <PINMUX_GPIO5__FUNC_EINT5>;
@@ -406,14 +411,14 @@
 	};
 	ctp_pins_rst_output0: rstoutput0 {
 		pins_cmd_dat {
-			pins = <PINMUX_GPIO2__FUNC_GPIO2>;
+			pins = <PINMUX_GPIO18__FUNC_GPIO18>;
 			slew-rate = <1>;
 			output-low;
 		};
 	};
 	ctp_pins_rst_output1: rstoutput1 {
 		pins_cmd_dat {
-			pins = <PINMUX_GPIO2__FUNC_GPIO2>;
+			pins = <PINMUX_GPIO18__FUNC_GPIO18>;
 			slew-rate = <1>;
 			output-high;
 		};
