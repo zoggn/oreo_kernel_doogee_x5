@@ -1,4 +1,4 @@
-#
+# #
 # Touchscreen driver configuration
 #
 menuconfig INPUT_TOUCHSCREEN
@@ -121,7 +121,6 @@ config TOUCHSCREEN_MTK_FT5X0X
 	  module will be called.
 
 source "drivers/input/touchscreen/mediatek/ft5x0x/Kconfig"
-
 
 config TOUCHSCREEN_MTK_FT6336S
 	bool "FT633S for Mediatek package"
