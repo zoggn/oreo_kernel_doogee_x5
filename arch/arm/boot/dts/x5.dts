@@ -361,13 +361,13 @@
 /* TOUCH GPIO standardization */
 &touch {
 	tpd-resolution = <720 1280>;
-	use-tpd-button = <0>;
-	tpd-key-num = <3>;
-	tpd-key-local= <139 172 158 0>;
-	tpd-key-dim-local = <90 883 100 40 230 883 100 40 370 883 100 40 0 0 0 0>;
+	use-tpd-button = <1>;
+	tpd-key-num = <4>;
+	tpd-key-local= <139 158 172 0>;
+	tpd-key-dim-local = <430 1350 60 50  270 1350 60 50  90 1350 60 50  630 1350 60 50>;
 	tpd-max-touch-num = <5>;
 	tpd-filter-enable = <1>;
-	tpd-filter-pixel-density = <124>;
+	tpd-filter-pixel-density = <93>;
 	tpd-filter-custom-prameters = <0 0 0 0 0 0 0 0 0 0 0 0>;
 	tpd-filter-custom-speed = <0 0 0>;
 	pinctrl-names = "default", "state_eint_as_int", "state_eint_output0", "state_eint_output1",
@@ -423,10 +423,12 @@
 
 /* AUDIO GPIO standardization */
 &audgpio {
-	pinctrl-names = "default", "audpmicclk-mode0", "audpmicclk-mode1";
+	pinctrl-names = "default", "audpmicclk-mode0", "audpmicclk-mode1", "extamp-pullhigh", "extamp-pulllow";
 	pinctrl-0 = <&AUD_pins_default>;
 	pinctrl-1 = <&AUD_pins_pmicclk_mode0>;
 	pinctrl-2 = <&AUD_pins_pmicclk_mode1>;
+	pinctrl-3 = <&AUD_pins_extamp_pullhigh>;
+	pinctrl-4 = <&AUD_pins_extamp_pulllow>;
 	status = "okay";
 };
 &pio {
@@ -453,6 +455,20 @@
 		pins_cmd2_dat {
 			pins = <PINMUX_GPIO27__FUNC_AUD_DAT_MOSI>;
 		};
+	};
+    AUD_pins_extamp_pullhigh: extamp-pullhigh{
+        pins_cmd_dat{
+			pins = <PINMUX_GPIO20__FUNC_GPIO20>;
+			slew-rate = <1>;
+			output-high;
+        };
+	};
+	AUD_pins_extamp_pulllow: extamp-pulllow{
+        pins_cmd_dat{
+			pins = <PINMUX_GPIO20__FUNC_GPIO20>;
+			slew-rate = <1>;
+			output-low;
+        };
 	};
 };
 /* AUDIO end */
