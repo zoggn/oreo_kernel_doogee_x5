@@ -104,8 +104,8 @@
 
 	gyro@68 {
 		i2c_num = <2>;
-		i2c_addr = <0x68 0 0 0>;
-		direction = <1>;
+		i2c_addr = <0x15 0 0 0>;
+		direction = <3>;
 		power_id = <0xffff>;
 		power_vol = <0>;
 		firlen = <0>;
@@ -119,7 +119,7 @@
 		status = "okay";
 		/* customization */
 		i2c_num = <2>;
-		i2c_addr = <0x60 0 0 0>;
+		i2c_addr = <0x49 0 0 0>;
 		polling_mode_ps = <0>;
 		polling_mode_als = <1>;
 		power_id = <0xffff>;
@@ -364,7 +364,7 @@
 	use-tpd-button = <1>;
 	tpd-key-num = <4>;
 	tpd-key-local= <139 158 172 0>;
-	tpd-key-dim-local = <430 1350 60 50  270 1350 60 50  90 1350 60 50  630 1350 60 50>;
+	tpd-key-dim-local = <430 1350 60 50  90 1350 60 50 270 1350 60 50 630 1350 60 50>;
 	tpd-max-touch-num = <5>;
 	tpd-filter-enable = <1>;
 	tpd-filter-pixel-density = <93>;
