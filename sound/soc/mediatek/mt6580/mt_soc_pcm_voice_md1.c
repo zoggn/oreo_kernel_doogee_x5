@@ -71,7 +71,7 @@ static int mtk_soc_voice_new(struct snd_soc_pcm_runtime *rtd);
 static int mtk_voice_platform_probe(struct snd_soc_platform *platform);
 
 static bool Voice_Status;
-static struct AudioDigtalI2S mAudioDigitalI2S;
+static AudioDigtalI2S mAudioDigitalI2S;
 
 bool get_voice_status(void)
 {
@@ -79,7 +79,7 @@ bool get_voice_status(void)
 }
 EXPORT_SYMBOL(get_voice_status);
 
-static struct AudioDigitalPCM Voice1Pcm = {
+static AudioDigitalPCM Voice1Pcm = {
 	.mTxLchRepeatSel = Soc_Aud_TX_LCH_RPT_TX_LCH_NO_REPEAT,
 	.mVbt16kModeSel = Soc_Aud_VBT_16K_MODE_VBT_16K_MODE_DISABLE,
 	.mExtModemSel = Soc_Aud_EXT_MODEM_MODEM_2_USE_INTERNAL_MODEM,
@@ -155,6 +155,8 @@ static int mtk_voice_pcm_open(struct snd_pcm_substream *substream)
 	AudDrv_Clk_On();
 	AudDrv_ADC_Clk_On();
 
+	pr_warn("mtk_voice_pcm_open\n");
+
 	runtime->hw = mtk_pcm_hardware;
 	memcpy((void *)(&(runtime->hw)), (void *)&mtk_pcm_hardware,
 	       sizeof(struct snd_pcm_hardware));
@@ -172,13 +174,21 @@ static int mtk_voice_pcm_open(struct snd_pcm_substream *substream)
 
 	runtime->hw.info |= SNDRV_PCM_INFO_INTERLEAVED;
 	runtime->hw.info |= SNDRV_PCM_INFO_NONINTERLEAVED;
-	runtime->rate = 16000;
+
+	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
+		pr_warn("SNDRV_PCM_STREAM_PLAYBACK mtkalsa_voice_constraints\n");
+		runtime->rate = 16000;
+	} else {
+		pr_warn("SNDRV_PCM_STREAM_CAPTURE mtkalsa_voice_constraints\n");
+		runtime->rate = 16000;
+	}
 
 	if (ret < 0) {
 		pr_warn("mtk_voice_close\n");
 		mtk_voice_close(substream);
 		return ret;
 	}
+	pr_warn("mtk_voice_pcm_open return\n");
 	return 0;
 }
 
@@ -197,9 +207,10 @@ static void ConfigAdcI2S(struct snd_pcm_substream *substream)
 
 static int mtk_voice_close(struct snd_pcm_substream *substream)
 {
-	pr_debug("%s(), substream->stream = %d\n", __func__, substream->stream);
+	pr_warn("mtk_voice_close\n");
 
 	if (substream->stream == SNDRV_PCM_STREAM_CAPTURE) {
+		pr_warn("%s  with SNDRV_PCM_STREAM_CAPTURE\n", __func__);
 		AudDrv_ADC_Clk_Off();
 		AudDrv_Clk_Off();
 		return 0;
@@ -268,11 +279,11 @@ static int mtk_voice1_prepare(struct snd_pcm_substream *substream)
 {
 	struct snd_pcm_runtime *runtimeStream = substream->runtime;
 
-	pr_warn("%s, rate = %d  channels = %d period_size = %lu, substream->stream = %d\n",
-		__func__, runtimeStream->rate, runtimeStream->channels,
-		runtimeStream->period_size, substream->stream);
+	pr_warn("mtk_voice1_prepare rate = %d  channels = %d period_size = %lu\n",
+	       runtimeStream->rate, runtimeStream->channels, runtimeStream->period_size);
 
 	if (substream->stream == SNDRV_PCM_STREAM_CAPTURE) {
+		pr_warn("%s  with SNDRV_PCM_STREAM_CAPTURE\n", __func__);
 		return 0;
 	}
 	/* here start digital part */
@@ -318,6 +329,7 @@ static int mtk_pcm_hw_params(struct snd_pcm_substream *substream,
 {
 	int ret = 0;
 
+	pr_warn("mtk_pcm_hw_params\n");
 	return ret;
 }
 
@@ -348,7 +360,7 @@ static struct snd_soc_platform_driver mtk_soc_voice_platform = {
 
 static int mtk_voice_probe(struct platform_device *pdev)
 {
-	pr_info("mtk_voice_probe\n");
+	pr_warn("mtk_voice_probe\n");
 
 	pdev->dev.coherent_dma_mask = DMA_BIT_MASK(64);
 
@@ -367,13 +379,13 @@ static int mtk_soc_voice_new(struct snd_soc_pcm_runtime *rtd)
 {
 	int ret = 0;
 
-	pr_info("%s\n", __func__);
+	pr_warn("%s\n", __func__);
 	return ret;
 }
 
 static int mtk_voice_platform_probe(struct snd_soc_platform *platform)
 {
-	pr_info("mtk_voice_platform_probe\n");
+	pr_warn("mtk_voice_platform_probe\n");
 
 	snd_soc_add_platform_controls(platform, Audio_snd_speech_controls,
 				      ARRAY_SIZE(Audio_snd_speech_controls));
@@ -383,7 +395,7 @@ static int mtk_voice_platform_probe(struct snd_soc_platform *platform)
 
 static int mtk_voice_remove(struct platform_device *pdev)
 {
-	pr_info("%s\n", __func__);
+	pr_debug("%s\n", __func__);
 	snd_soc_unregister_platform(&pdev->dev);
 	return 0;
 }

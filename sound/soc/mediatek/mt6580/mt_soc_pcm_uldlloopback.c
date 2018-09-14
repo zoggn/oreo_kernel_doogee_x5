@@ -95,16 +95,18 @@ static int mtk_uldlloopback_open(struct snd_pcm_substream *substream)
 	struct snd_pcm_runtime *runtime = substream->runtime;
 	int ret = 0;
 
-	pr_debug("%s, stream = %s\n",
-		 __func__,
-		 substream->stream == SNDRV_PCM_STREAM_PLAYBACK ?
-		 "SNDRV_PCM_STREAM_PLAYBACK" : "SNDRV_PCM_STREAM_CAPTURE");
+	pr_warn("%s\n", __func__);
+	if (substream->stream == SNDRV_PCM_STREAM_CAPTURE) {
+		pr_err("%s  with mtk_uldlloopback_open\n", __func__);
+		runtime->rate = 48000;
+		return 0;
+	}
 
 	AudDrv_Clk_On();
 	AudDrv_ADC_Clk_On();
 
 	runtime->hw = mtk_uldlloopback_hardware;
-	memcpy((void *)(&(runtime->hw)), (void *)&mtk_uldlloopback_hardware,
+	memcpy((void *)(&(runtime->hw)), (void *)&mtk_uldlloopback_hardware ,
 	       sizeof(struct snd_pcm_hardware));
 
 	ret = snd_pcm_hw_constraint_list(runtime, 0, SNDRV_PCM_HW_PARAM_RATE,
@@ -140,8 +142,6 @@ static int mtk_uldlloopbackpcm_close(struct snd_pcm_substream *substream)
 	pr_warn("%s\n", __func__);
 	if (substream->stream == SNDRV_PCM_STREAM_CAPTURE) {
 		pr_err("%s  with SNDRV_PCM_STREAM_CAPTURE\n", __func__);
-		AudDrv_ADC_Clk_Off();
-		AudDrv_Clk_Off();
 		return 0;
 	}
 	/* interconnection setting */
@@ -216,7 +216,7 @@ static struct page *mtk_uldlloopback_page(struct snd_pcm_substream *substream, u
 	return virt_to_page(dummy_page[substream->stream]);	/* the same page */
 }
 
-static struct AudioDigtalI2S mAudioDigitalI2S;
+static AudioDigtalI2S mAudioDigitalI2S;
 static void ConfigAdcI2S(struct snd_pcm_substream *substream)
 {
 	mAudioDigitalI2S.mLR_SWAP = Soc_Aud_LR_SWAP_NO_SWAP;
@@ -233,10 +233,10 @@ static void ConfigAdcI2S(struct snd_pcm_substream *substream)
 static int mtk_uldlloopback_pcm_prepare(struct snd_pcm_substream *substream)
 {
 	struct snd_pcm_runtime *runtime = substream->runtime;
-	/* unsigned int eSamplingRate = SampleRateTransform(runtime->rate);
-	unsigned int dVoiceModeSelect = 0;
-	unsigned int Audio_I2S_Dac = 0; */
-	unsigned int u32AudioI2S = 0;
+	/* uint32 eSamplingRate = SampleRateTransform(runtime->rate);
+	uint32 dVoiceModeSelect = 0;
+	uint32 Audio_I2S_Dac = 0; */
+	uint32 u32AudioI2S = 0;
 
 	/*SetMemoryPathEnable(Soc_Aud_Digital_Block_I2S_OUT_DAC, true);
 	SetMemoryPathEnable(Soc_Aud_Digital_Block_I2S_IN_ADC, true);*/

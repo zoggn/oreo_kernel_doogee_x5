@@ -71,7 +71,7 @@
 #include <cust_battery_meter.h> */
 #include <linux/dma-mapping.h>
 
-static struct AFE_MEM_CONTROL_T *pHp_impedance_MemControl;
+static AFE_MEM_CONTROL_T *pHp_impedance_MemControl;
 static const int DCoffsetDefault = 1500;	/* 95: 1622 */
 static const int DCoffsetVariance = 2;	/* 95: 90  // 5% */
 
@@ -129,7 +129,7 @@ static snd_pcm_uframes_t mtk_pcm_hp_impedance_pointer(struct snd_pcm_substream
 static void SetDL1Buffer(struct snd_pcm_substream *substream, struct snd_pcm_hw_params *hw_params)
 {
 	struct snd_pcm_runtime *runtime = substream->runtime;
-	struct AFE_BLOCK_T *pblock = &pHp_impedance_MemControl->rBlock;
+	AFE_BLOCK_T *pblock = &pHp_impedance_MemControl->rBlock;
 
 	pblock->pucPhysBufAddr = runtime->dma_addr;
 	pblock->pucVirtBufAddr = runtime->dma_area;
@@ -155,7 +155,7 @@ static int mtk_pcm_hp_impedance_params(struct snd_pcm_substream *substream,
 {
 	int ret = 0;
 
-	/* pr_warn("mtk_pcm_hp_impedance_params\n"); */
+	pr_warn("mtk_pcm_hp_impedance_params\n");
 
 	/* runtime->dma_bytes has to be set manually to allow mmap */
 	substream->runtime->dma_bytes = params_buffer_bytes(hw_params);
@@ -172,7 +172,7 @@ static int mtk_pcm_hp_impedance_params(struct snd_pcm_substream *substream,
 
 static int mtk_pcm_hp_impedance_hw_free(struct snd_pcm_substream *substream)
 {
-	/* PRINTK_AUDDRV("mtk_pcm_hp_impedance_hw_free\n"); */
+	PRINTK_AUDDRV("mtk_pcm_hp_impedance_hw_free\n");
 	return 0;
 }
 
@@ -203,8 +203,8 @@ static int mtk_pcm_hp_impedance_open(struct snd_pcm_substream *substream)
 		PRINTK_AUDDRV("snd_pcm_hw_constraint_integer failed\n");
 
 
-	/* if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
-		PRINTK_AUDDRV("SNDRV_PCM_STREAM_PLAYBACK mtkalsa_playback_constraints\n"); */
+	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
+		PRINTK_AUDDRV("SNDRV_PCM_STREAM_PLAYBACK mtkalsa_playback_constraints\n");
 
 	if (ret < 0) {
 		PRINTK_AUDDRV("mtk_soc_pcm_hp_impedance_close\n");
@@ -375,7 +375,7 @@ static int Audio_HP_ImpeDance_Set(struct snd_kcontrol *kcontrol,
 		for (value = 0; value < 10000; value += 200) {
 			unsigned short temp = value;
 			static unsigned short dcoffset;
-			unsigned short *Sramdata;
+			volatile unsigned short *Sramdata;
 			int i = 0;
 
 			pr_warn("set sram to dc value = %d\n", temp);
@@ -444,7 +444,7 @@ static unsigned short Phase2Check(unsigned short adcvalue, unsigned int adcoffse
 		return AUDIO_HP_IMPEDANCE32;
 }
 
-static void FillDatatoDlmemory(unsigned int *memorypointer,
+static void FillDatatoDlmemory(volatile unsigned int *memorypointer,
 			       unsigned int fillsize, unsigned short value)
 {
 	int addr = 0;

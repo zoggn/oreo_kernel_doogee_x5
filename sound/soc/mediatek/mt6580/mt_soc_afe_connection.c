@@ -78,9 +78,9 @@
 #include <linux/string.h>
 #include <linux/mutex.h>
 /*#include <mach/irqs.h>*/
-#include <linux/uaccess.h>
+#include <asm/uaccess.h>
 #include <asm/irq.h>
-#include <linux/io.h>
+#include <asm/io.h>
 /*#include <mach/mt_reg_base.h>*/
 #include <asm/div64.h>
 #include <mt-plat/aee.h>
@@ -416,12 +416,10 @@ static bool CheckBitsandReg(short regaddr, char bits)
 	return true;
 }
 
-bool SetConnectionState(unsigned int ConnectionState, unsigned int Input, unsigned int Output)
+bool SetConnectionState(uint32 ConnectionState, uint32 Input, uint32 Output)
 {
-	/*
 	pr_warn("SetinputConnection ConnectionState = %d Input = %d Output = %d\n",
 	       ConnectionState, Input, Output);
-	*/
 	if ((mConnectionTable[Input][Output]) < 0) {
 		pr_warn("no connection mpConnectionTable[%d][%d] = %d\n", Input, Output,
 		       mConnectionTable[Input][Output]);
@@ -505,7 +503,7 @@ bool SetConnectionState(unsigned int ConnectionState, unsigned int Input, unsign
 			}
 		}
 	}
-	/* pr_debug("SetinputConnection---\n"); */
+	pr_warn("SetinputConnection---\n");
 	return true;
 }
 EXPORT_SYMBOL(SetConnectionState);

@@ -73,9 +73,9 @@
 #include <linux/proc_fs.h>
 #include <linux/string.h>
 #include <linux/mutex.h>
-#include <linux/uaccess.h>
+#include <asm/uaccess.h>
 #include <asm/irq.h>
-#include <linux/io.h>
+#include <asm/io.h>
 /*#include <mach/mt_reg_base.h>*/
 #include <asm/div64.h>
 #include <mt-plat/aee.h>
@@ -226,8 +226,8 @@ extern const unsigned int soc_high_supported_sample_rates[13];
 
 unsigned long audio_frame_to_bytes(struct snd_pcm_substream *substream, unsigned long count);
 unsigned long audio_bytes_to_frame(struct snd_pcm_substream *substream, unsigned long count);
-unsigned long mtk_local_audio_copy_from_user(bool IsSRAM, uint8_t *dst, char *src, int len);
-unsigned long mtk_local_audio_copy_to_user(bool IsSRAM, uint8_t *dst, char *src, int len);
+unsigned long mtk_local_audio_copy_from_user(bool IsSRAM, kal_uint8 *dst, char *src, int len);
+unsigned long mtk_local_audio_copy_to_user(bool IsSRAM, kal_uint8 *dst, char *src, int len);
 
 extern void *AFE_BASE_ADDRESS;
 
