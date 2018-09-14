@@ -110,29 +110,29 @@ extern void msleep(unsigned int msecs);
 /* --------------------------------------------------------------------------- */
 static void lcm_init_power(void)
 {
-mt_set_gpio_mode(0x8000000F, 0);
-mt_set_gpio_dir(0x8000000F, 1);
-mt_set_gpio_out(0x8000000F, 1);
+  mt_set_gpio_mode(0x8000000F, 0);
+  mt_set_gpio_dir(0x8000000F, 1);
+  mt_set_gpio_out(0x8000000F, 1);
 }
 
 static void lcm_suspend_power(void)
 {
-mt_set_gpio_mode(0x8000000F, 0);
-mt_set_gpio_dir(0x8000000F, 1);
-mt_set_gpio_out(0x8000000F, 0);
+  mt_set_gpio_mode(0x8000000F, 0);
+  mt_set_gpio_dir(0x8000000F, 1);
+  mt_set_gpio_out(0x8000000F, 0);
 }
 
 static void lcm_resume_power(void)
 {
-mt_set_gpio_mode(0x8000000F, 0);
-mt_set_gpio_dir(0x8000000F, 1);
-mt_set_gpio_out(0x8000000F, 1);
+  mt_set_gpio_mode(0x8000000F, 0);
+  mt_set_gpio_dir(0x8000000F, 1);
+  mt_set_gpio_out(0x8000000F, 1);
 }
 
 struct LCM_setting_table {
-unsigned cmd;
-unsigned char count;
-unsigned char para_list[64];
+  unsigned cmd;
+  unsigned char count;
+  unsigned char para_list[64];
 };
 static struct LCM_setting_table lcm_initialization_setting[] = {
 { 0x0, 0x01, {0x00}},
@@ -262,11 +262,13 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
 { 0x0, 0x01, {0x00}},
 { 0xff, 0x03, {0xff, 0xff, 0xff}},
 { 0x35, 0x01, {0x00}},
-{0x11, 1 , {0x00}},
-{REGFLAG_DELAY, 120, {}},
-{0x29, 1 , {0x00}},
-{REGFLAG_DELAY, 20, {}},
-{REGFLAG_END_OF_TABLE, 0x00, {}}
+{ 0x13, 0x01, {0x00}},
+{ REGFLAG_DELAY, 50, {}},
+{ 0x11, 0x01, {0x00}},
+{ REGFLAG_DELAY, 120, {}},
+{ 0x29, 0x01, {0x00}},
+{ REGFLAG_DELAY, 20, {}},
+{ REGFLAG_END_OF_TABLE, 0x00, {}},
 };
 
 static struct LCM_setting_table lcm_deep_sleep_mode_in_setting[] = {
@@ -290,9 +292,9 @@ static struct LCM_setting_table lcm_deep_sleep_mode_in_setting[] = {
 
 static void push_table(struct LCM_setting_table *table, unsigned int count, unsigned char force_update)
 {
-    unsigned int i;
+	unsigned int i;
 
-    for(i = 0; i < count; i++) {
+	for(i = 0; i < count; i++) {
 
         unsigned int cmd;
         cmd = table[i].cmd;
@@ -307,8 +309,8 @@ static void push_table(struct LCM_setting_table *table, unsigned int count, unsi
                 break;
 
             default:
-        dsi_set_cmdq_V2(cmd, table[i].count, table[i].para_list, force_update);
-        }
+		dsi_set_cmdq_V2(cmd, table[i].count, table[i].para_list, force_update);
+       	}
     }
 
 }
@@ -318,15 +320,14 @@ static void push_table(struct LCM_setting_table *table, unsigned int count, unsi
 
 static void lcm_set_util_funcs(const LCM_UTIL_FUNCS *util)
 {
-    memcpy(&lcm_util, util, sizeof(LCM_UTIL_FUNCS));
+	memcpy(&lcm_util, util, sizeof(LCM_UTIL_FUNCS));
 }
 
 
 static void lcm_get_params(LCM_PARAMS * params)
 {
-    memset(params, 0, sizeof(LCM_PARAMS));  
-    
-    params->type = LCM_TYPE_DSI;
+	memset(params, 0, sizeof(LCM_PARAMS));
+	params->type = LCM_TYPE_DSI;
 	params->width = FRAME_WIDTH;
 	params->height = FRAME_HEIGHT;
 
@@ -337,11 +338,39 @@ static void lcm_get_params(LCM_PARAMS * params)
 #if (LCM_DSI_CMD_MODE)
 	params->dsi.mode = CMD_MODE;
 #else
+	//params->dsi.mode   = SYNC_EVENT_VDO_MODE;
 		params->dsi.mode   = SYNC_PULSE_VDO_MODE;
 #endif
-        
-    // DSI
-    /* Command mode setting */
+
+	// DSI
+	/* Command mode setting */
+/*	params->dsi.LANE_NUM = LCM_TWO_LANE;
+	//The following defined the fomat for data coming from LCD engine.
+	params->dsi.data_format.color_order = LCM_COLOR_ORDER_RGB;
+	params->dsi.data_format.trans_seq   = LCM_DSI_TRANS_SEQ_MSB_FIRST;
+	params->dsi.data_format.padding     = LCM_DSI_PADDING_ON_LSB;
+	params->dsi.data_format.format      = LCM_DSI_FORMAT_RGB888;
+
+	params->dsi.intermediat_buffer_num = 0;	//because DSI/DPI HW design change, this parameters should be 0 when video mode in MT658X; or memory leakage
+
+	params->dsi.PS = LCM_PACKED_PS_24BIT_RGB888;
+	params->dsi.word_count = 720 * 3;
+
+		params->dsi.vertical_sync_active				= 0x3;// 3    3
+		params->dsi.vertical_backporch					= 0x0E;// 20   14
+		params->dsi.vertical_frontporch					= 0x10; // 1  12 16
+		params->dsi.vertical_active_line				= FRAME_HEIGHT; 
+
+		params->dsi.horizontal_sync_active				= 0x04;// 50  2
+		params->dsi.horizontal_backporch				= 0x28 ;//40
+		params->dsi.horizontal_frontporch				= 0x1e ;//30
+		params->dsi.horizontal_active_pixel				= FRAME_WIDTH;
+
+	// Bit rate calculation
+	//1 Every lane speed
+    params->dsi.PLL_CLOCK =400;
+    params->dsi.esd_check_enable = 1;
+    params->dsi.customization_esd_check_enable = 0;*/
 params->dsi.word_count = 2160;
 params->dsi.vertical_sync_active = 3;
 params->dsi.vertical_backporch = 14;
@@ -352,16 +381,22 @@ params->dsi.horizontal_frontporch = 30;
 params->dsi.PLL_CLOCK = 400;
 params->dsi.lcm_esd_check_table[0].cmd = 10;
 params->dsi.lcm_esd_check_table[0].para_list[0] = -100;
+params->type = 2;
 params->dsi.LANE_NUM = 2;
 params->dsi.data_format.format = 2;
 params->dsi.PS = 2;
 params->dsi.noncont_clock_period = 2;
+params->width = 720;
 params->dsi.horizontal_active_pixel = 720;
+params->height = 1280;
 params->dsi.vertical_active_line = 1280;
+params->dbi.te_mode = 0;
+params->dbi.te_edge_polarity = 0;
 params->dsi.data_format.color_order = 0;
 params->dsi.data_format.trans_seq = 0;
 params->dsi.data_format.padding = 0;
 params->dsi.intermediat_buffer_num = 0;
+params->dsi.mode = 1;
 params->dsi.ssc_disable = 1;
 params->dsi.cont_clock = 1;
 params->dsi.esd_check_enable = 1;
@@ -373,37 +408,57 @@ params->dsi.lcm_esd_check_table[0].count = 1;
 extern void lcm_set_enp_bias(bool Val);
 static void lcm_init(void)
 {
-    SET_RESET_PIN(1);
-    MDELAY(10);
-    SET_RESET_PIN(0);
-    MDELAY(20);
-    SET_RESET_PIN(1);
-    MDELAY(120);
-    push_table(lcm_initialization_setting, sizeof(lcm_initialization_setting) / sizeof(struct LCM_setting_table), 1);
+	SET_RESET_PIN(1);
+	MDELAY(1);
+	SET_RESET_PIN(0);
+	MDELAY(50);
+	SET_RESET_PIN(1);
+	MDELAY(120);
+	push_table(lcm_initialization_setting, sizeof(lcm_initialization_setting) / sizeof(struct LCM_setting_table), 1);
 }
 
 static void lcm_suspend(void)
 {
-    push_table(lcm_deep_sleep_mode_in_setting,
-        sizeof(lcm_deep_sleep_mode_in_setting) /
-        sizeof(struct LCM_setting_table), 1);
-    SET_RESET_PIN(0);
-    MDELAY(10);
+	push_table(lcm_deep_sleep_mode_in_setting,
+		   sizeof(lcm_deep_sleep_mode_in_setting) /
+		   sizeof(struct LCM_setting_table), 1);
+	SET_RESET_PIN(0);
+	MDELAY(10);
 }
 
 static void lcm_resume(void)
 {
-    lcm_init();
+	lcm_init();
 }
 
 LCM_DRIVER otm1283a_cmi50_tps65132_hd_lcm_drv = {
-    .name = "otm1283a_cmi50_tps65132_hd",
-    .set_util_funcs = lcm_set_util_funcs,
-    .get_params = lcm_get_params,
-    .init = lcm_init,
-    .suspend = lcm_suspend,
-    .resume = lcm_resume,
-    .init_power = lcm_init_power,
-    .resume_power = lcm_resume_power,
-    .suspend_power = lcm_suspend_power,
+	.name = "otm1283a_cmi50_tps65132_hd",
+	.set_util_funcs = lcm_set_util_funcs,
+	.get_params = lcm_get_params,
+	.init = lcm_init,
+	.suspend = lcm_suspend,
+	.resume = lcm_resume,
+	.init_power = lcm_init_power,
+	.resume_power = lcm_resume_power,
+	.suspend_power = lcm_suspend_power,
 };
+
+/*int lcm_compare_id()
+{
+  int id;
+  unsigned char out[5];
+  signed int data[4];
+
+  SET_RESET_PIN(1);
+  msleep(10);
+  SET_RESET_PIN(0);
+  msleep(50);
+  SET_RESET_PIN(1);
+  msleep(120);
+  data[0] = 0x53700;
+  dsi_set_cmdq(data);
+  dsi_dcs_read_lcm_reg_v2(0xA1, out, 5);
+  id = out[3] | (out[2] << 8);
+  return (0x1283 == id)?1:0;
+}*/
+  //return id - 0x1283 + ((unsigned int)(id - 0x1283) <= 0) - (id - 0x1283);
