@@ -1434,6 +1434,9 @@
 		dsi_te: dsi_te {
 			compatible = "mediatek, dsi_te-eint";
 		};
+        breathlight:breathlight_drv {
+            compatible = "mediatek,breathlight";
+        };
 
 	};
 
