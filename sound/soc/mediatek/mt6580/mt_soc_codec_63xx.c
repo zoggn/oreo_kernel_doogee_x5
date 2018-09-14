@@ -70,6 +70,7 @@
 #include "AudDrv_Clk.h"
 #include "mt_soc_analog_type.h"
 #include <mach/mt_clkbuf_ctl.h>
+#include "AudDrv_Gpio.h"
 
 
 #include <sound/mt_soc_audio.h>
