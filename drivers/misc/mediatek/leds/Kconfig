@@ -21,3 +21,7 @@ config BACKLIGHT_SUPPORT_LM3697
 	default n
  	---help---
 	  charge pump driver for external backlight
+	  
+config LED_BREATHLIGHT_AW2013
+    tristate "breathlight aw2013"
+    default n
