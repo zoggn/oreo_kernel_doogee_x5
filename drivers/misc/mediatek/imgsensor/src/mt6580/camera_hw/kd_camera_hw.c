@@ -388,7 +388,9 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 
 			mdelay(20);
 		} else if (currSensorName
-			   && (0 == strcmp(SENSOR_DRVNAME_GC2355_MIPI_RAW, currSensorName))) {
+			   && ((0 == strcmp(SENSOR_DRVNAME_GC2355_MIPI_RAW, currSensorName)) ||
+                  (0 == strcmp(SENSOR_DRVNAME_GC5024_MIPI_RAW,currSensorName)) 
+            )) {
 			mtkcam_gpio_set(pinSetIdx, CAMLDO, 1);
 			/* First Power Pin low and Reset Pin Low */
 			if (GPIO_CAMERA_INVALID != pinSet[pinSetIdx][IDX_PS_CMPDN])
@@ -692,7 +694,9 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 			}
 
 		} else if (currSensorName &&
-			   (0 == strcmp(SENSOR_DRVNAME_GC2355_MIPI_RAW, currSensorName))) {
+			   ((0 == strcmp(SENSOR_DRVNAME_GC2355_MIPI_RAW, currSensorName)) ||
+               (0 == strcmp(SENSOR_DRVNAME_GC5024_MIPI_RAW,currSensorName))
+            )) {
 			mtkcam_gpio_set(pinSetIdx, CAMLDO, 0);
 			/* Set Power Pin low and Reset Pin Low */
 			if (GPIO_CAMERA_INVALID != pinSet[pinSetIdx][IDX_PS_CMPDN])
