@@ -41,7 +41,7 @@ LCM_DRIVER *lcm_driver_list[] = {
 	&otm1284a_hd720_dsi_vdo_tm_lcm_drv,
 #endif
 #if defined(OTM1283A_CMI50_TPS65132_HD)
-	&otm1283a_cmi50_tps65132_hd_lcm_drv
+	&otm1283a_cmi50_tps65132_hd_lcm_drv,
 #endif
 #if defined(OTM1285A_HD720_DSI_VDO_TM)
 	&otm1285a_hd720_dsi_vdo_tm_lcm_drv,
@@ -129,6 +129,10 @@ LCM_DRIVER *lcm_driver_list[] = {
 	&ili9806e_dsi_vdo_fwvga_drv,
 #endif
 
+#if defined(ILI9881C_AUO50_XZX_HD)
+    &ili9881c_auo50_xzx_hd_lcm_drv,
+#endif
+    
 #if defined(ILI9806E_DSI_VDO_TCL_BLU5039)
 	&ili9806e_dsi_vdo_tcl_blu5039_drv,
 #endif
