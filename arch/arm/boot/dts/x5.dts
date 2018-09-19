@@ -346,9 +346,9 @@
 &pio {
 	ACCDET_pins_default: eint0default {
 	};
-	ACCDET_pins_eint_as_int: eint@0 {
+	ACCDET_pins_eint_as_int: eint@3 {
 		pins_cmd_dat {
-			pins = <PINMUX_GPIO0__FUNC_EINT0>;
+			pins = <PINMUX_GPIO19__FUNC_EINT3>;
 			slew-rate = <0>;
 			bias-disable;
 		};
@@ -806,6 +806,160 @@
 	status = "okay";
 };
 /* LCM GPIO Kernal Standardization end */
+
+#define __HCT_FINGERPRINT_EINT_EN_PIN_NUM__   9
+#define __HCT_FINGERPRINT_EINT_PIN__    PINMUX_GPIO9__FUNC_EINT9
+
+#define __HCT_FINGERPRINT_RESET_PIN__    PINMUX_GPIO17__FUNC_GPIO17
+
+&hct_finger{
+	pinctrl-names = "default", "finger_power_en0","finger_power_en1","finger_reset_en0","finger_reset_en1","finger_spi0_mi_as_spi0_mi","finger_spi0_mi_as_gpio",
+                          "finger_spi0_mo_as_spi0_mo","finger_spi0_mo_as_gpio","finger_spi0_clk_as_spi0_clk","finger_spi0_clk_as_gpio","finger_spi0_cs_as_spi0_cs",
+                          "finger_spi0_cs_as_gpio","finger_int_as_int";
+	pinctrl-0 = <&finger_pins_default>;
+	pinctrl-1 = <&finger_power_en0>;
+	pinctrl-2 = <&finger_power_en1>;
+	pinctrl-3 = <&finger_reset_en0>;
+	pinctrl-4 = <&finger_reset_en1>;
+	pinctrl-5 = <&finger_spi0_mi_as_spi0_mi>;
+	pinctrl-6 = <&finger_spi0_mi_as_gpio>;
+	pinctrl-7 = <&finger_spi0_mo_as_spi0_mo>;
+	pinctrl-8 = <&finger_spi0_mo_as_gpio>;
+	pinctrl-9 = <&finger_spi0_clk_as_spi0_clk>;
+	pinctrl-10= <&finger_spi0_clk_as_gpio>;
+	pinctrl-11= <&finger_spi0_cs_as_spi0_cs>;
+	pinctrl-12= <&finger_spi0_cs_as_gpio>;
+	pinctrl-13= <&finger_int_as_int>;
+};
+
+&hct_finger {
+	interrupt-parent = <&eintc>;
+	interrupts = <__HCT_FINGERPRINT_EINT_EN_PIN_NUM__ IRQ_TYPE_EDGE_FALLING>;
+	debounce = <__HCT_FINGERPRINT_EINT_EN_PIN_NUM__ 0>;
+	status = "okay";
+};
+
+/* flashlight GPIO standardization */
+&pio {
+/*******************finger pin start ****************/
+
+	finger_pins_default:finger_pins_default{
+	};
+	finger_power_en0:finger_power_en@0{
+		    pins_cmd0_dat {
+			pins = <PINMUX_GPIO11__FUNC_GPIO11>;
+			slew-rate = <1>;
+			output-low;
+		};
+		    pins_cmd1_dat {
+			pins = <PINMUX_GPIO12__FUNC_GPIO12>;
+			slew-rate = <1>;
+			output-low;
+		};
+	};
+	finger_power_en1:finger_power_en@1{
+		    pins_cmd0_dat {
+			pins = <PINMUX_GPIO11__FUNC_GPIO11>;
+			slew-rate = <1>;
+			output-high;
+		};
+		    pins_cmd1_dat {
+			pins = <PINMUX_GPIO12__FUNC_GPIO12>;
+			slew-rate = <1>;
+			output-high;
+		};
+	};
+	finger_reset_en0:finger_reset_en@0{
+		    pins_cmd_dat {
+			pins = <__HCT_FINGERPRINT_RESET_PIN__>;
+			slew-rate = <1>;
+			output-low;
+		};
+	};
+	finger_reset_en1:finger_reset_en@1{
+		    pins_cmd_dat {
+			pins = <__HCT_FINGERPRINT_RESET_PIN__>;
+			slew-rate = <1>;
+			output-high;
+		};
+	};
+	finger_spi0_mi_as_spi0_mi:finger_spi0_mi_as_spi0_mi@0{
+		    pins_cmd_dat {
+			pins = <PINMUX_GPIO3__FUNC_SPI1_MISO>;
+			slew-rate = <0>;
+			
+			output-low;
+			
+		};
+	};
+	finger_spi0_mi_as_gpio:finger_spi0_mi_as_gpio@0{
+		    pins_cmd_dat {
+			pins = <PINMUX_GPIO3__FUNC_GPIO3>;
+			slew-rate = <0>;
+			output-low;
+			input-schmitt-enable = <0>;
+		};
+	};
+	finger_spi0_mo_as_spi0_mo:finger_spi0_mo_as_spi0_mo@0{
+		    pins_cmd_dat {
+			pins = <PINMUX_GPIO2__FUNC_SPI1_MOSI>;
+			slew-rate = <1>;
+			
+			output-low;
+			
+		};
+	};
+	finger_spi0_mo_as_gpio:finger_spi0_mo_as_gpio@0{
+		    pins_cmd_dat {
+			pins = <PINMUX_GPIO2__FUNC_GPIO2>;
+			slew-rate = <1>;
+			output-low;
+			input-schmitt-enable = <0>;
+		};
+	};
+	finger_spi0_clk_as_spi0_clk:finger_spi0_clk_as_spi0_clk@0{
+		    pins_cmd_dat {
+			pins = <PINMUX_GPIO1__FUNC_SPI1_SCK>;
+			slew-rate = <1>;
+			
+			output-low;
+			
+		};
+	};
+	finger_spi0_clk_as_gpio:finger_spi0_clk_as_gpio@0{
+		    pins_cmd_dat {
+			pins = <PINMUX_GPIO1__FUNC_GPIO1>;
+			slew-rate = <1>;
+			output-low;
+			input-schmitt-enable = <0>;
+		};
+	};
+	finger_spi0_cs_as_spi0_cs:finger_spi0_cs_as_spi0_cs@0{
+		    pins_cmd_dat {
+			pins = <PINMUX_GPIO0__FUNC_SPI1_CS>;
+			slew-rate = <1>;
+			
+			output-low;
+			
+		};
+	};
+	finger_spi0_cs_as_gpio:finger_spi0_cs_as_gpio@0{
+		    pins_cmd_dat {
+			pins = <PINMUX_GPIO0__FUNC_GPIO0>;
+			slew-rate = <1>;
+			output-low;
+			input-schmitt-enable = <0>;
+		};
+	};
+	finger_int_as_int: finger_int_as_int@0{
+			pins_cmd_dat {
+				pins = <__HCT_FINGERPRINT_EINT_PIN__>;
+				slew-rate = <0>;
+				bias-pull-up = <00>;
+			};
+	};
+};
+/*******************finger pin end ****************/
 
 #include <x5/cust.dtsi>
 /*End of this file, DO NOT ADD ANYTHING HERE*/

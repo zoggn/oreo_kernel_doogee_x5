@@ -1430,7 +1430,9 @@
 		mtkfb: mtkfb@0 {
 			compatible = "mediatek,mtkfb";
 		};
-
+        hct_finger: hct_finger{
+           compatible  = "mediatek,hct_finger";
+        };
 		dsi_te: dsi_te {
 			compatible = "mediatek, dsi_te-eint";
 		};
