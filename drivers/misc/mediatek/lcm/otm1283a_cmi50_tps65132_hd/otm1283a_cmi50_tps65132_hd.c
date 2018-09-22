@@ -41,7 +41,17 @@
 #endif
 #include "lcm_drv.h"
 /*#include "ddp_irq.h"*/
-
+#if 1
+#ifdef BUILD_LK
+#define GPIO_LCD_PWR      GPIO_LCM_PWR
+static void lcm_set_gpio_output(unsigned int GPIO, unsigned int output)
+{
+	mt_set_gpio_mode(GPIO, GPIO_MODE_00);
+	mt_set_gpio_dir(GPIO, GPIO_DIR_OUT);
+	mt_set_gpio_out(GPIO, (output > 0) ? GPIO_OUT_ONE : GPIO_OUT_ZERO);
+}
+#endif
+#endif
 #ifdef BUILD_LK
 #define LCD_DEBUG(fmt)  dprintf(CRITICAL,fmt)
 #else
@@ -62,6 +72,207 @@
 #include <linux/interrupt.h>
 #include <linux/io.h>
 #include <linux/platform_device.h>
+
+#if 1
+#define TPS_I2C_ID_NAME "I2C_LCD_BIAS"
+/*
+#define TPS_I2C_BUSNUM  1//I2C_I2C_LCD_BIAS_CHANNEL//for I2C channel 0
+#define TPS_ADDR 0x3E
+static struct i2c_board_info __initdata tps65132_board_info = {I2C_BOARD_INFO(TPS_I2C_ID_NAME, TPS_ADDR)};
+*/
+static struct i2c_client *tps65132_i2c_client = NULL;
+static int tps65132_probe(struct i2c_client *client, const struct i2c_device_id *id);
+static int tps65132_remove(struct i2c_client *client);
+/*
+   struct tps65132_dev    {
+   struct i2c_client   *client;
+   };
+ */
+
+static const struct i2c_device_id tps65132_id[] = {
+  { TPS_I2C_ID_NAME, 0 },
+  { }
+};
+
+#ifdef CONFIG_OF
+static const struct of_device_id lcm_of_match[] = {
+  { .compatible = "mediatek,I2C_LCD_BIAS", },
+  {},
+};
+
+MODULE_DEVICE_TABLE(of, lcm_of_match)
+#endif
+
+  static struct i2c_driver tps65132_iic_driver = {
+    .id_table   = tps65132_id,
+    .probe      = tps65132_probe,
+    .remove     = tps65132_remove,
+    .driver     = {
+      .owner	= THIS_MODULE,
+      .name   = TPS_I2C_ID_NAME,
+#ifdef CONFIG_OF
+      .of_match_table = lcm_of_match,
+#endif        
+    },
+  };
+
+static int tps65132_probe(struct i2c_client *client, const struct i2c_device_id *id)
+{
+  pr_err("tps65132_iic_probe\n");
+  pr_err("TPS: info==>name=%s addr=0x%x\n",client->name,client->addr);
+  tps65132_i2c_client  = client;
+  return 0;
+}
+static int tps65132_remove(struct i2c_client *client)
+{
+  pr_err( "tps65132_remove\n");
+  tps65132_i2c_client = NULL;
+  i2c_unregister_device(client);
+  return 0;
+}
+static int tps65132_write_bytes(unsigned char addr, unsigned char value)
+{
+  int ret = 0;
+  struct i2c_client *client = tps65132_i2c_client;
+  char write_data[2]={0};
+  write_data[0]= addr;
+  write_data[1] = value;
+  ret=i2c_master_send(client, write_data, 2);
+  if(ret<0)
+    pr_err("tps65132 write data fail !!\n");
+  return ret ;
+}
+
+static int __init tps65132_iic_init(void)
+{
+  pr_err( "tps65132_iic_init\n");
+  //i2c_register_board_info(TPS_I2C_BUSNUM, &tps65132_board_info, 1);
+  //pr_err( "tps65132_iic_init2\n");
+  if(i2c_add_driver(&tps65132_iic_driver))
+  {
+    pr_err( "add tps65132 error\n");
+    return -1;
+  }
+  pr_err( "tps65132_iic_init success\n");	
+  return 0;
+}
+static void __exit tps65132_iic_exit(void)
+{
+  pr_err( "tps65132_iic_exit\n");
+  i2c_del_driver(&tps65132_iic_driver);
+}
+module_init(tps65132_iic_init);
+module_exit(tps65132_iic_exit);
+MODULE_AUTHOR("Xiaokuan Shi");
+MODULE_DESCRIPTION("MTK TPS65132 I2C Driver");
+MODULE_LICENSE("GPL");
+//TPS65132_i2c.id = I2C_CHANNEL_0; //I2C_I2C_LCD_BIAS_CHANNEL;//I2C1;
+#endif
+#endif
+#if 0
+#ifdef BUILD_LK
+
+#ifdef GPIO_LCM_PWR
+#define GPIO_LCD_PWR      GPIO_LCM_PWR
+#else
+#define GPIO_LCD_PWR      0xFFFFFFFF
+#endif
+
+static void lcm_set_gpio_output(unsigned int GPIO, unsigned int output)
+{
+	mt_set_gpio_mode(GPIO, GPIO_MODE_00);
+	mt_set_gpio_dir(GPIO, GPIO_DIR_OUT);
+	mt_set_gpio_out(GPIO, (output > 0) ? GPIO_OUT_ONE : GPIO_OUT_ZERO);
+}
+#else
+
+
+/*static unsigned int GPIO_LCD_PWR_EN;*/
+static struct pinctrl *lcmctrl;
+static struct pinctrl_state *lcd_pwr_high;
+static struct pinctrl_state *lcd_pwr_low;
+
+static int lcm_get_gpio(struct device *dev)
+{
+	int ret = 0;
+
+	lcmctrl = devm_pinctrl_get(dev);
+	if (IS_ERR(lcmctrl)) {
+		dev_err(dev, "Cannot find lcm pinctrl!");
+		ret = PTR_ERR(lcmctrl);
+	}
+	/*lcm power pin lookup */
+	lcd_pwr_high = pinctrl_lookup_state(lcmctrl, "lcm_pwr_high");
+	if (IS_ERR(lcd_pwr_high)) {
+		ret = PTR_ERR(lcd_pwr_high);
+		pr_debug("%s : pinctrl err, lcd_pwr_high\n", __func__);
+	}
+	lcd_pwr_low = pinctrl_lookup_state(lcmctrl, "lcm_pwr_low");
+	if (IS_ERR(lcd_pwr_low)) {
+		ret = PTR_ERR(lcd_pwr_low);
+		pr_debug("%s : pinctrl err, lcd_pwr_low\n", __func__);
+	}
+	return ret;
+}
+
+void lcm_set_gpio(int val)
+{
+	if (val == 0) {
+		pinctrl_select_state(lcmctrl, lcd_pwr_low);
+		pr_debug("LCM: lcm set power off\n");
+	} else {
+		pinctrl_select_state(lcmctrl, lcd_pwr_high);
+		pr_debug("LCM: lcm set power on\n");
+	}
+}
+
+
+static int lcm_probe(struct device *dev)
+{
+    printk("lcm probe\n");
+	lcm_get_gpio(dev);
+
+	return 0;
+}
+
+static const struct of_device_id lcm_of_ids[] = {
+	{.compatible = "mediatek,mt6580-lcm",},
+	{}
+};
+
+static struct platform_driver lcm_driver = {
+	.driver = {
+		   .name = "mtk_lcm",
+		   .owner = THIS_MODULE,
+		   .probe = lcm_probe,
+#ifdef CONFIG_OF
+		   .of_match_table = lcm_of_ids,
+#endif
+		   },
+};
+
+static int __init lcm_init(void)
+{
+	pr_notice("LCM: Register lcm driver\n");
+	if (platform_driver_register(&lcm_driver)) {
+		printk("LCM: failed to register disp driver\n");
+		return -ENODEV;
+	}
+
+	return 0;
+}
+
+static void __exit lcm_exit(void)
+{
+	platform_driver_unregister(&lcm_driver);
+	pr_notice("LCM: Unregister lcm driver done\n");
+}
+late_initcall(lcm_init);
+module_exit(lcm_exit);
+MODULE_AUTHOR("mediatek");
+MODULE_DESCRIPTION("Display subsystem Driver");
+MODULE_LICENSE("GPL");
+#endif
 #endif
 /* --------------------------------------------------------------------------- */
 /* Local Constants */
@@ -108,31 +319,115 @@ extern void msleep(unsigned int msecs);
 /* --------------------------------------------------------------------------- */
 /* Local Functions */
 /* --------------------------------------------------------------------------- */
-static void lcm_init_power(void)
+#if 1
+#ifdef BUILD_LK
+
+#define TPS65132_SLAVE_ADDR_WRITE  0x7C  
+static struct mt_i2c_t TPS65132_i2c;
+
+static int TPS65132_write_byte(kal_uint8 addr, kal_uint8 value)
 {
-    mt_set_gpio_mode(0x8000000F, 0);
-    mt_set_gpio_dir(0x8000000F, 1);
-    mt_set_gpio_out(0x8000000F, 1);
+  kal_uint32 ret_code = I2C_OK;
+  kal_uint8 write_data[2];
+  kal_uint16 len;
+
+  write_data[0]= addr;
+  write_data[1] = value;
+
+  TPS65132_i2c.id = 1;//I2C_I2C_LCD_BIAS_CHANNEL;//I2C2;
+  /* Since i2c will left shift 1 bit, we need to set FAN5405 I2C address to >>1 */
+  TPS65132_i2c.addr = (TPS65132_SLAVE_ADDR_WRITE >> 1);
+  TPS65132_i2c.mode = ST_MODE;
+  TPS65132_i2c.speed = 100;
+  len = 2;
+  ret_code = i2c_write(&TPS65132_i2c, write_data, len);
+
+  return ret_code;
 }
 
+#endif
+#endif
+#if 0
+static void lcm_init_power(void)
+{
+
+  unsigned char cmd = 0x0;
+  unsigned char data = 0xFF;
+  int ret=0;
+  cmd=0x00;
+  data=0x0e;
+#ifdef BUILD_LK
+	printf("[LK/LCM] lcm_init_power() enter\n");
+	lcm_set_gpio_output(GPIO_LCD_PWR, GPIO_OUT_ONE);
+	MDELAY(20);
+#else
+	printk("[Kernel/LCM] lcm_init_power() enter\n");
+#endif
+#if 1
+#ifdef BUILD_LK
+  ret=TPS65132_write_byte(cmd,data);
+  if(ret) 	
+    dprintf(0, "[LK]otm1906c----tps6132----cmd=%0x--i2c write error----\n",cmd); 	
+  else
+    dprintf(0, "[LK]otm1906c----tps6132----cmd=%0x--i2c write success----\n",cmd);			
+#else
+  ret=tps65132_write_bytes(cmd,data);
+  if(ret<0)
+    pr_err("[KERNEL]otm1906c----tps6132---cmd=%0x-- i2c write error-----\n",cmd);
+  else
+    pr_err("[KERNEL]otm1906c----tps6132---cmd=%0x-- i2c write success-----\n",cmd);
+#endif
+  cmd=0x01;
+  data=0x0e;
+#ifdef BUILD_LK
+  ret=TPS65132_write_byte(cmd,data);
+  if(ret) 	
+    dprintf(0, "[LK]otm1906c----tps6132----cmd=%0x--i2c write error----\n",cmd); 	
+  else
+    dprintf(0, "[LK]otm1906c----tps6132----cmd=%0x--i2c write success----\n",cmd);	
+#else
+  ret=tps65132_write_bytes(cmd,data);
+  if(ret<0)
+    pr_err("[KERNEL]otm1906c----tps6132---cmd=%0x-- i2c write error-----\n",cmd);
+  else
+    pr_err("[KERNEL]otm1906c----tps6132---cmd=%0x-- i2c write success-----\n",cmd);
+#endif
+#endif
+}
+#endif
+/*
 static void lcm_suspend_power(void)
 {
-    mt_set_gpio_mode(0x8000000F, 0);
-    mt_set_gpio_dir(0x8000000F, 1);
-    mt_set_gpio_out(0x8000000F, 0);
+#ifdef BUILD_LK
+	printf("[LK/LCM] lcm_suspend_power() enter\n");
+	lcm_set_gpio_output(GPIO_LCD_PWR, GPIO_OUT_ZERO);
+	MDELAY(20);
+
+#else
+	printk("[Kernel/LCM] lcm_suspend_power() enter\n");
+	lcm_set_gpio(0);
+	MDELAY(20);
+#endif
 }
 
 static void lcm_resume_power(void)
 {
-    mt_set_gpio_mode(0x8000000F, 0);
-    mt_set_gpio_dir(0x8000000F, 1);
-    mt_set_gpio_out(0x8000000F, 1);
-}
+#ifdef BUILD_LK
+	printf("[LK/LCM] lcm_resume_power() enter\n");
+	lcm_set_gpio_output(GPIO_LCD_PWR, GPIO_OUT_ONE);
+	MDELAY(20);
 
+#else
+	printk("[Kernel/LCM] lcm_resume_power() enter\n");
+	lcm_set_gpio(1);
+	MDELAY(20);
+#endif
+}
+*/
 struct LCM_setting_table {
-    unsigned cmd;
-    unsigned char count;
-    unsigned char para_list[64];
+  unsigned cmd;
+  unsigned char count;
+  unsigned char para_list[64];
 };
 static struct LCM_setting_table lcm_initialization_setting[] = {
     { 0x0, 0x01, {0x00}},
@@ -270,36 +565,47 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
 };
 
 static struct LCM_setting_table lcm_deep_sleep_mode_in_setting[] = {
-    { 0x28, 0x01, {0x00}},
-    { 0xFFE, 0x0A, {0x00}},
-    { 0x10, 0x01, {0x00}},
-    { 0xFFE, 0x78, {0x00}},
-    { 0xFFF, 0x00, {0x00}}
+	// Display off sequence
+	{0x28, 1, {0x00}},
+	{REGFLAG_DELAY, 10, {}},
+	// Sleep Mode On
+	{0x10, 1, {0x00}},
+	{REGFLAG_DELAY, 120, {}},
+	{REGFLAG_END_OF_TABLE, 0x00, {}}
 };
-
+/*static struct LCM_setting_table lcm_deep_sleep_mode_out_setting[] = {
+	// Display off sequence
+	{0x11, 1, {0x00}},
+	{REGFLAG_DELAY, 120, {}},
+	// Sleep Mode On
+	{0x29, 1, {0x00}},
+	{REGFLAG_DELAY, 20, {}},
+	{REGFLAG_END_OF_TABLE, 0x00, {}}
+};
+*/
 static void push_table(struct LCM_setting_table *table, unsigned int count, unsigned char force_update)
 {
-    unsigned int i;
-    
-    for(i = 0; i < count; i++) {
-        
+	unsigned int i;
+
+	for(i = 0; i < count; i++) {
+
         unsigned int cmd;
         cmd = table[i].cmd;
-        
+
         switch (cmd) {
-            
+
             case REGFLAG_DELAY :
                 MDELAY(table[i].count);
                 break;
-                
+
             case REGFLAG_END_OF_TABLE :
                 break;
-                
+
             default:
-                dsi_set_cmdq_V2(cmd, table[i].count, table[i].para_list, force_update);
-        }
+		dsi_set_cmdq_V2(cmd, table[i].count, table[i].para_list, force_update);
+       	}
     }
-    
+
 }
 /* --------------------------------------------------------------------------- */
 /* LCM Driver Implementations */
@@ -307,7 +613,7 @@ static void push_table(struct LCM_setting_table *table, unsigned int count, unsi
 
 static void lcm_set_util_funcs(const LCM_UTIL_FUNCS *util)
 {
-    memcpy(&lcm_util, util, sizeof(LCM_UTIL_FUNCS));
+	memcpy(&lcm_util, util, sizeof(LCM_UTIL_FUNCS));
 }
 
 
@@ -368,37 +674,110 @@ static void lcm_get_params(LCM_PARAMS * params)
 extern void lcm_set_enp_bias(bool Val);
 static void lcm_init(void)
 {
-    SET_RESET_PIN(1);
-    MDELAY(1);
-    SET_RESET_PIN(0);
-    MDELAY(50);
-    SET_RESET_PIN(1);
-    MDELAY(120);
-    push_table(lcm_initialization_setting, sizeof(lcm_initialization_setting) / sizeof(struct LCM_setting_table), 1);
+  unsigned char cmd = 0x0;
+  unsigned char data = 0xFF;
+  int ret=0;
+
+#ifndef BUILD_LK
+  //TODO, modify to fix build error
+  //lcm_set_enp_bias(1);
+#endif
+  cmd=0x00;
+  data=0x0e;
+#ifdef BUILD_LK
+  ret=TPS65132_write_byte(cmd,data);
+#else
+  ret=tps65132_write_bytes(cmd,data);
+#endif
+  cmd=0x01;
+  data=0x0e;
+#ifdef BUILD_LK
+  ret=TPS65132_write_byte(cmd,data);
+#else
+  ret=tps65132_write_bytes(cmd,data);
+#endif
+
+	SET_RESET_PIN(1);
+	MDELAY(1);
+	SET_RESET_PIN(0);
+	MDELAY(50);
+	SET_RESET_PIN(1);
+	MDELAY(120);
+	push_table(lcm_initialization_setting, sizeof(lcm_initialization_setting) / sizeof(struct LCM_setting_table), 1);
 }
 
 static void lcm_suspend(void)
 {
-    push_table(lcm_deep_sleep_mode_in_setting,
-               sizeof(lcm_deep_sleep_mode_in_setting) /
-               sizeof(struct LCM_setting_table), 1);
-    SET_RESET_PIN(0);
+	push_table(lcm_deep_sleep_mode_in_setting,
+		   sizeof(lcm_deep_sleep_mode_in_setting) /
+		   sizeof(struct LCM_setting_table), 1);
+	SET_RESET_PIN(1);
+	MDELAY(1);
+	SET_RESET_PIN(0);
+	MDELAY(50);
+	SET_RESET_PIN(1);
+	MDELAY(50);
+#ifndef BUILD_LK
+  //TODO, modify to fix build error
+    //lcm_set_enp_bias(0);
     MDELAY(10);
+#endif
+
 }
 
 static void lcm_resume(void)
 {
-    lcm_init();
-}
+	lcm_init();
 
+/*	push_table(lcm_deep_sleep_mode_out_setting,
+		   sizeof(lcm_deep_sleep_mode_out_setting) /
+		   sizeof(struct LCM_setting_table), 1);
+*/
+
+}
+static unsigned int lcm_compare_id(void)
+{
+	unsigned int id0, id1, id2, id3, id4;
+	unsigned char buffer[5];
+	unsigned int array[5];
+
+	SET_RESET_PIN(1);
+	MDELAY(10);
+	SET_RESET_PIN(0);
+	MDELAY(10);
+	SET_RESET_PIN(1);
+	MDELAY(50);
+
+	// Set Maximum return byte = 1
+	array[0] = 0x00053700;
+	dsi_set_cmdq(array, 1, 1);
+
+	read_reg_v2(0xA1, buffer, 5);
+	id0 = buffer[0];
+	id1 = buffer[1];
+	id2 = buffer[2];
+	id3 = buffer[3];
+	id4 = buffer[4];
+
+#if defined(BUILD_LK)
+	printf("%s, Module ID = {%x, %x, %x, %x, %x} \n", __func__, id0,
+	       id1, id2, id3, id4);
+#else
+	printk("%s, Module ID = {%x, %x, %x, %x,%x} \n", __func__, id0,
+	       id1, id2, id3, id4);
+#endif
+
+	return ( 0x1283 == ((id2 << 8) | id3)) ? 1 : 0;
+}
 LCM_DRIVER otm1283a_cmi50_tps65132_hd_lcm_drv = {
-    .name = "otm1283a_cmi50_tps65132_hd",
-    .set_util_funcs = lcm_set_util_funcs,
-    .get_params = lcm_get_params,
-    .init = lcm_init,
-    .suspend = lcm_suspend,
-    .resume = lcm_resume,
-    .init_power = lcm_init_power,
-    .resume_power = lcm_resume_power,
-    .suspend_power = lcm_suspend_power,
+	.name = "otm1283a_cmi50_tps65132_hd",
+	.set_util_funcs = lcm_set_util_funcs,
+	.get_params = lcm_get_params,
+	.init = lcm_init,
+	.suspend = lcm_suspend,
+	.resume = lcm_resume,
+  .compare_id     = lcm_compare_id,
+//	.init_power = lcm_init_power,
+//	.resume_power = lcm_resume_power,
+//	.suspend_power = lcm_suspend_power,
 };
