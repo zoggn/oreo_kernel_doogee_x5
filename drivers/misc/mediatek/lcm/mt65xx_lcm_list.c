@@ -51,6 +51,10 @@ LCM_DRIVER *lcm_driver_list[] = {
 	&nt35595_fhd_dsi_cmd_truly_8163_lcm_drv,
 #endif
 
+#if defined(NT35521_BOE50_BLJ_HD)
+    &nt35521_boe50_blj_hd_lcm_drv,
+#endif
+    
 #if defined(NT35523_WXGA_DSI_VDO_8163)
 	&nt35523_wxga_dsi_vdo_8163_lcm_drv,
 #endif
@@ -923,6 +927,18 @@ LCM_DRIVER *lcm_driver_list[] = {
 	&otm1906b_fhd_dsi_cmd_jdi_tps65132_lcm_drv,
 #endif
 
+#if defined(JD9365_INX50_JMG_HD)
+    &jd9365_inx50_jmg_hd_lcm_drv,
+#endif
+
+#if defined(RM68200_TM50_XLD_HD)
+    &rm68200_tm50_xld_hd_lcm_drv,
+#endif
+
+#if defined(RM68200_CPT50_BLJ_HD)
+    &rm68200_cpt50_blj_hd_lcm_drv,
+#endif
+    
 #if defined(OTM1906B_FHD_DSI_CMD_JDI_TPS65132_MT6797)
 	&otm1906b_fhd_dsi_cmd_jdi_tps65132_mt6797_lcm_drv,
 #endif
