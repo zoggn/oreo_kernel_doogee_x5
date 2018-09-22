@@ -1430,6 +1430,9 @@
 		mtkfb: mtkfb@0 {
 			compatible = "mediatek,mtkfb";
 		};
+        flashlightgpio:gpio_flashlight{
+			compatible = "mediatek,gpio_flashlight";
+		};
         hct_finger: hct_finger{
            compatible  = "mediatek,hct_finger";
         };

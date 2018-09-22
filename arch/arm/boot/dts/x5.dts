@@ -111,23 +111,26 @@
 		firlen = <0>;
 		is_batch_supported = <0>;
 	};
-    cust_alsps@0 {
-		compatible				= "mediatek,EPL2182";
-		i2c_num				    = <2>;
-		i2c_addr				= <0x49 0 0 0>;
-		polling_mode_ps			= <0>;
-		polling_mode_als		= <1>;
-		power_id				= <0xffff>;
-		power_vol				= <0>;
-        /* Total has 15 level*/
-		als_level	= <0 125 319 525 1091 2480 3058 5115 8589 10769 12857 17807 22091 65535 65535>;
-        /*  Total has 16 range*/
-	    als_value = <0 133 303 504 1002 2003 3006 5003 8002 10000 12000 16000 20000 20000 20000 20000>;
-		ps_threshold_high		=  <26>;
-		ps_threshold_low		=  <21>;
-		is_batch_supported_ps	= <0>;
-		is_batch_supported_als	= <0>;
-		};
+
+	alsps@60 {
+		pinctrl-names = "pin_default", "pin_cfg";
+		pinctrl-0 = <&alsps_intpin_default>;
+		pinctrl-1 = <&alsps_intpin_cfg>;
+		status = "okay";
+		/* customization */
+		i2c_num = <2>;
+		i2c_addr = <0x49 0 0 0>;
+		polling_mode_ps = <0>;
+		polling_mode_als = <1>;
+		power_id = <0xffff>;
+		power_vol = <0>;
+		als_level = <0 125 319 525 1091 2480 3058 5115 8589 10769 12857 17807 22091 65535 65535>;
+		als_value = <0 133 303 504 1002 2003 3006 5003 8002 10000 12000 16000 20000 20000 20000 20000>;
+		ps_threshold_high =  <26>;
+		ps_threshold_low =  <21>;
+		is_batch_supported_ps = <0>;
+		is_batch_supported_als = <0>;
+    };
 };
 
 /* mmc start */
@@ -806,6 +809,51 @@
 	status = "okay";
 };
 /* LCM GPIO Kernal Standardization end */
+
+/* FLASHLIGHT GPIO standardization */
+&pio {
+	flashlight_pins_default: flashlightdefault {
+	};
+    flashlight_pins_mode_output0: modeoutput@0 {
+		pins_cmd_dat {
+			pins = <PINMUX_GPIO34__FUNC_GPIO34>;
+			slew-rate = <1>;
+			output-low;
+		};
+	};
+	flashlight_pins_mode_output1: modeoutput@1 {
+		pins_cmd_dat {
+			pins = <PINMUX_GPIO34__FUNC_GPIO34>;
+			slew-rate = <1>;
+			output-high;
+		};
+	};
+	flashlight_pins_en_output0: enoutput@0 {
+		pins_cmd_dat {
+			pins = <PINMUX_GPIO8__FUNC_GPIO8>;
+			slew-rate = <1>;
+			output-low;
+		};
+	};
+	flashlight_pins_en_output1: enoutput@1 {
+		pins_cmd_dat {
+			pins = <PINMUX_GPIO8__FUNC_GPIO8>;
+			slew-rate = <1>;
+			output-high;
+		};
+	};
+};
+&flashlightgpio {
+	pinctrl-names = "default", "state_mode_output0", "state_mode_output1",
+	"state_en_output0", "state_en_output1";
+	pinctrl-0 = <&flashlight_pins_default>;
+	pinctrl-1 = <&flashlight_pins_mode_output0>;
+	pinctrl-2 = <&flashlight_pins_mode_output1>;
+	pinctrl-3 = <&flashlight_pins_en_output0>;
+	pinctrl-4 = <&flashlight_pins_en_output1>;
+	status = "okay";
+};
+/* FLASHLIGHT end */
 
 #define __HCT_FINGERPRINT_EINT_EN_PIN_NUM__   9
 #define __HCT_FINGERPRINT_EINT_PIN__    PINMUX_GPIO9__FUNC_EINT9
