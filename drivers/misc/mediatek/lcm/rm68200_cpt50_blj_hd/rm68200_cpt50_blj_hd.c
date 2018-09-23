@@ -82,7 +82,7 @@ static void lcm_resume_power(void)
 {
 }
 static struct LCM_setting_table lcm_initialization_setting[] = {
-  { 0xFE, 0x01, {0x01}},
+    { 0xFE, 0x01, {0x01}},
     { 0x24, 0x01, {0xC0}},
     { 0x25, 0x01, {0x53}},
     { 0x26, 0x01, {0x00}},
@@ -352,7 +352,7 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
     { 0x11, 0x00, {0x00}},
     { REGFLAG_DELAY, 120, {0x00}},
     { 0x29, 0x00, {0x00}},
-    { REGFLAG_DELAY, 0x50, {0x00}},
+    { REGFLAG_DELAY, 50, {0x00}},
     { REGFLAG_END_OF_TABLE, 0x00, {0x00}}
 
 };
@@ -413,23 +413,23 @@ static void lcm_get_params(LCM_PARAMS * params)
 
   // DSI
   /* Command mode setting */
-  v1->dsi.LANE_NUM = 3;
-  v1->dsi.packet_size = 256;
-  v1->dsi.vertical_backporch = 14;
-  v1->dsi.vertical_frontporch = 16;
-  v1->dsi.horizontal_sync_active = 8;
-  v1->dsi.PLL_CLOCK = 210;
-  v1->dsi.data_format.format = 2;
-  v1->dsi.PS = 2;
-  v1->dsi.vertical_sync_active = 2;
-  v1->dsi.horizontal_active_pixel = 720;
-  v1->dsi.vertical_active_line = 1280;
-  v1->dsi.data_format.color_order = 0;
-  v1->dsi.data_format.trans_seq = 0;
-  v1->dsi.data_format.padding = 0;
-  v1->dsi.intermediat_buffer_num = 0;
-  v1->dsi.horizontal_backporch = 64;
-  v1->dsi.horizontal_frontporch = 64;
+  params->dsi.LANE_NUM = 3;
+  params->dsi.packet_size = 256;
+  params->dsi.vertical_backporch = 14;
+  params->dsi.vertical_frontporch = 16;
+  params->dsi.horizontal_sync_active = 8;
+  params->dsi.PLL_CLOCK = 210;
+  params->dsi.data_format.format = 2;
+  params->dsi.PS = 2;
+  params->dsi.vertical_sync_active = 2;
+  params->dsi.horizontal_active_pixel = 720;
+  params->dsi.vertical_active_line = 1280;
+  params->dsi.data_format.color_order = 0;
+  params->dsi.data_format.trans_seq = 0;
+  params->dsi.data_format.padding = 0;
+  params->dsi.intermediat_buffer_num = 0;
+  params->dsi.horizontal_backporch = 64;
+  params->dsi.horizontal_frontporch = 64;
 }
 
 static void lcm_init(void)
