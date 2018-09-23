@@ -61,7 +61,7 @@
 
 #define MAGIC_NUMBER 0xFFFFFFC0
 static DEFINE_SPINLOCK(auddrv_I2S0dl1_lock);
-static AFE_MEM_CONTROL_T *pI2S0dl1MemControl;
+static struct AFE_MEM_CONTROL_T *pI2S0dl1MemControl;
 static struct snd_dma_buffer *Dl1_Playback_dma_buf;
 static unsigned int mPlaybackSramState = SRAM_STATE_FREE;
 static bool mPlaybackUseSram;
@@ -79,7 +79,7 @@ static int mI2S0dl1_hdoutput_control;
 static bool mPrepareDone;
 
 static const void *irq_user_id;
-static uint32 irq1_cnt;
+static unsigned int irq1_cnt;
 
 static struct device *mDev;
 
@@ -101,7 +101,7 @@ static int Audio_I2S0dl1_hdoutput_Get(struct snd_kcontrol *kcontrol,
 static int Audio_I2S0dl1_hdoutput_Set(struct snd_kcontrol *kcontrol,
 				      struct snd_ctl_elem_value *ucontrol)
 {
-	pr_warn("%s(), not support this function\n", __func__);
+	/*pr_warn("%s(), not support this function\n", __func__);*/
 	if (ucontrol->value.enumerated.item[0] > ARRAY_SIZE(I2S0dl1_HD_output)) {
 		pr_warn("return -EINVAL\n");
 		return -EINVAL;
@@ -162,7 +162,7 @@ static struct snd_pcm_hardware mtk_I2S0dl1_hardware = {
 
 static int mtk_pcm_I2S0dl1_stop(struct snd_pcm_substream *substream)
 {
-	/* AFE_BLOCK_T *Afe_Block = &(pI2S0dl1MemControl->rBlock); */
+	/* struct AFE_BLOCK_T *Afe_Block = &(pI2S0dl1MemControl->rBlock); */
 
 	pr_warn("%s\n", __func__);
 
@@ -189,11 +189,11 @@ static int mtk_pcm_I2S0dl1_stop(struct snd_pcm_substream *substream)
 static snd_pcm_uframes_t mtk_pcm_I2S0dl1_pointer(struct snd_pcm_substream
 						 *substream)
 {
-	kal_int32 HW_memory_index = 0;
-	kal_int32 HW_Cur_ReadIdx = 0;
-	kal_uint32 Frameidx = 0;
-	kal_int32 Afe_consumed_bytes = 0;
-	AFE_BLOCK_T *Afe_Block = &pI2S0dl1MemControl->rBlock;
+	int32_t HW_memory_index = 0;
+	int32_t HW_Cur_ReadIdx = 0;
+	uint32_t Frameidx = 0;
+	int32_t Afe_consumed_bytes = 0;
+	struct AFE_BLOCK_T *Afe_Block = &pI2S0dl1MemControl->rBlock;
 	unsigned long flags;
 	/* struct snd_pcm_runtime *runtime = substream->runtime; */
 
@@ -226,7 +226,7 @@ static snd_pcm_uframes_t mtk_pcm_I2S0dl1_pointer(struct snd_pcm_substream
 		if (Afe_consumed_bytes > Afe_Block->u4DataRemained) {
 			PRINTK_AUDDRV("I2S0dl1_pointer underrun? WIdx=0x%x,RIdx=0x%x,DataRemain=0x%x,Consume=0x%x\n",
 			Afe_Block->u4WriteIdx, Afe_Block->u4DMAReadIdx, Afe_Block->u4DataRemained, Afe_consumed_bytes);
-			Afe_Block->u4DataRemained -= Afe_Block->u4DataRemained;
+			Afe_Block->u4DataRemained = 0;
 		} else {
 			Afe_Block->u4DataRemained -= Afe_consumed_bytes;
 		}
@@ -249,7 +249,7 @@ static snd_pcm_uframes_t mtk_pcm_I2S0dl1_pointer(struct snd_pcm_substream
 static void SetDL1Buffer(struct snd_pcm_substream *substream, struct snd_pcm_hw_params *hw_params)
 {
 	struct snd_pcm_runtime *runtime = substream->runtime;
-	AFE_BLOCK_T *pblock = &pI2S0dl1MemControl->rBlock;
+	struct AFE_BLOCK_T *pblock = &pI2S0dl1MemControl->rBlock;
 
 	pblock->pucPhysBufAddr = runtime->dma_addr;
 	pblock->pucVirtBufAddr = runtime->dma_area;
@@ -260,8 +260,8 @@ static void SetDL1Buffer(struct snd_pcm_substream *substream, struct snd_pcm_hw_
 	pblock->u4DataRemained = 0;
 	pblock->u4fsyncflag = false;
 	pblock->uResetFlag = true;
-	pr_warn("SetDL1Buffer u4BufferSize = %d pucVirtBufAddr = %p pucPhysBufAddr = 0x%x\n",
-	       pblock->u4BufferSize, pblock->pucVirtBufAddr, pblock->pucPhysBufAddr);
+	/*pr_warn("SetDL1Buffer u4BufferSize = %d pucVirtBufAddr = %p pucPhysBufAddr = 0x%x\n",
+	       pblock->u4BufferSize, pblock->pucVirtBufAddr, pblock->pucPhysBufAddr);*/
 	/* set dram address top hardware */
 	Afe_Set_Reg(AFE_DL1_BASE, pblock->pucPhysBufAddr, 0xffffffff);
 	Afe_Set_Reg(AFE_DL1_END, pblock->pucPhysBufAddr + (pblock->u4BufferSize - 1), 0xffffffff);
@@ -327,13 +327,16 @@ static int mtk_pcm_I2S0dl1_open(struct snd_pcm_substream *substream)
 	int ret = 0;
 	struct snd_pcm_runtime *runtime = substream->runtime;
 
+	pI2S0dl1MemControl = Get_Mem_ControlT(Soc_Aud_Digital_Block_MEM_DL1);
+
 	AfeControlSramLock();
-	if (GetSramState() == SRAM_STATE_FREE) {
+	if (GetSramState() == SRAM_STATE_FREE && !pI2S0dl1MemControl->mAssignDRAM) {
 		mtk_I2S0dl1_hardware.buffer_bytes_max = GetPLaybackSramFullSize();
 		mPlaybackSramState = SRAM_STATE_PLAYBACKFULL;
 		SetSramState(mPlaybackSramState);
 		mPlaybackUseSram = true;
 	} else {
+		pr_debug("%s(), use DRAM\n", __func__);
 		mtk_I2S0dl1_hardware.buffer_bytes_max = GetPLaybackDramSize();
 		mPlaybackSramState = SRAM_STATE_PLAYBACKDRAM;
 		mPlaybackUseSram = false;
@@ -352,7 +355,6 @@ static int mtk_pcm_I2S0dl1_open(struct snd_pcm_substream *substream)
 	AudDrv_Clk_On();
 	memcpy((void *)(&(runtime->hw)), (void *)&mtk_I2S0dl1_hardware,
 	       sizeof(struct snd_pcm_hardware));
-	pI2S0dl1MemControl = Get_Mem_ControlT(Soc_Aud_Digital_Block_MEM_DL1);
 
 	ret = snd_pcm_hw_constraint_list(runtime, 0, SNDRV_PCM_HW_PARAM_RATE,
 					 &constraints_sample_rates);
@@ -360,10 +362,10 @@ static int mtk_pcm_I2S0dl1_open(struct snd_pcm_substream *substream)
 	if (ret < 0)
 		pr_err("snd_pcm_hw_constraint_integer failed\n");
 
-	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
+	/* if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
 		pr_warn("SNDRV_PCM_STREAM_PLAYBACK mtkalsa_I2S0dl1_playback_constraints\n");
 	else
-		pr_warn("SNDRV_PCM_STREAM_CAPTURE mtkalsa_I2S0dl1_playback_constraints\n");
+		pr_warn("SNDRV_PCM_STREAM_CAPTURE mtkalsa_I2S0dl1_playback_constraints\n"); */
 
 	if (ret < 0) {
 		pr_err("ret < 0 mtk_pcm_I2S0dl1_close\n");
@@ -410,8 +412,8 @@ static int mtk_pcm_I2S0dl1_close(struct snd_pcm_substream *substream)
 static int mtk_pcm_I2S0dl1_prepare(struct snd_pcm_substream *substream)
 {
 	struct snd_pcm_runtime *runtime = substream->runtime;
-	/* uint32 MclkDiv3; */
-	uint32 u32AudioI2S = 0;
+	/* unsigned int MclkDiv3; */
+	unsigned int u32AudioI2S = 0;
 	bool mI2SWLen = Soc_Aud_I2S_WLEN_WLEN_16BITS;
 
 	if (mPrepareDone == false) {
@@ -546,7 +548,7 @@ static int mtk_pcm_I2S0dl1_copy(struct snd_pcm_substream *substream,
 				int channel, snd_pcm_uframes_t pos,
 				void __user *dst, snd_pcm_uframes_t count)
 {
-	AFE_BLOCK_T *Afe_Block = NULL;
+	struct AFE_BLOCK_T *Afe_Block = NULL;
 	int copy_size = 0, Afe_WriteIdx_tmp;
 	unsigned long flags;
 	static int DebugCount;
@@ -636,7 +638,7 @@ static int mtk_pcm_I2S0dl1_copy(struct snd_pcm_substream *substream,
 			     Afe_Block->u4DataRemained, (unsigned int)count);
 
 		} else {	/* copy twice */
-			kal_uint32 size_1 = 0, size_2 = 0;
+			uint32_t size_1 = 0, size_2 = 0;
 #ifdef AUDIO_64BYTE_ALIGN
 			size_1 = Align64ByteSize((Afe_Block->u4BufferSize - Afe_WriteIdx_tmp));
 			size_2 = Align64ByteSize((copy_size - size_1));

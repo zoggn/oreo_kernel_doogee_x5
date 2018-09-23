@@ -84,9 +84,9 @@
 #include <linux/mutex.h>
 /*#include <linux/xlog.h>*/
 /*#include <mach/irqs.h>*/
-#include <asm/uaccess.h>
+#include <linux/uaccess.h>
 #include <asm/irq.h>
-#include <asm/io.h>
+#include <linux/io.h>
 #include <asm/div64.h>
 /*
 #include <mach/mt_reg_base.h>
@@ -237,6 +237,7 @@ static ssize_t mt_soc_ana_debug_read(struct file *file, char __user *buf, size_t
 	n += scnprintf(buffer + n, size - n, "AUDTOP_CON7  = 0x%x\n", Ana_Get_Reg(AUDTOP_CON7));
 	n += scnprintf(buffer + n, size - n, "AUDTOP_CON8  = 0x%x\n", Ana_Get_Reg(AUDTOP_CON8));
 	n += scnprintf(buffer + n, size - n, "AUDTOP_CON9  = 0x%x\n", Ana_Get_Reg(AUDTOP_CON9));
+	n += scnprintf(buffer + n, size - n, "GPIO_DINV1  = 0x%x\n", Ana_Get_Reg(GPIO_DINV1));
 
 	pr_warn("mt_soc_ana_debug_read len = %d\n", n);
 
@@ -401,8 +402,9 @@ static char const PareGetkeyAna[] = "Getanareg";
 static ssize_t mt_soc_debug_write(struct file *f, const char __user *buf,
 				  size_t count, loff_t *offset)
 {
+#define MAX_DEBUG_WRITE_INPUT 256
 	int ret = 0;
-	char InputString[256];
+	char InputString[MAX_DEBUG_WRITE_INPUT];
 	char *token1 = NULL;
 	char *token2 = NULL;
 	char *token3 = NULL;
@@ -414,11 +416,21 @@ static ssize_t mt_soc_debug_write(struct file *f, const char __user *buf,
 	unsigned int long regvalue = 0;
 	char delim[] = " ,";
 
-	memset((void *)InputString, 0, 256);
-	if (copy_from_user((InputString), buf, count))
-		pr_warn("copy_from_user mt_soc_debug_write count = %zu temp = %s\n", count, InputString);
+	memset((void *)InputString, 0, MAX_DEBUG_WRITE_INPUT);
 
-	temp = kstrdup(InputString, GFP_KERNEL);
+	if (count > MAX_DEBUG_WRITE_INPUT)
+		count = MAX_DEBUG_WRITE_INPUT;
+
+	if (copy_from_user((InputString), buf, count))
+		pr_warn("%s(), copy_from_user fail, mt_soc_debug_write count = %zu, temp = %s\n",
+			__func__, count, InputString);
+
+	temp = kstrndup(InputString, MAX_DEBUG_WRITE_INPUT, GFP_KERNEL);
+	if (!temp) {
+		pr_warn("%s(), kstrndup fail\n", __func__);
+		goto exit;
+	}
+
 	pr_warn("copy_from_user mt_soc_debug_write count = %zu temp = %s pointer = %p\n",
 		count, InputString, InputString);
 	token1 = strsep(&temp, delim);
@@ -479,6 +491,9 @@ static ssize_t mt_soc_debug_write(struct file *f, const char __user *buf,
 	}
 	audckbufEnable(false);
 	AudDrv_Clk_Off();
+
+	kfree(temp);
+exit:
 	return count;
 }
 
@@ -584,6 +599,16 @@ static struct snd_soc_dai_link mt_soc_dai_common[] = {
 		.cpu_dai_name   = MT_SOC_I2S0DL1_NAME,
 		.platform_name  = MT_SOC_I2S0DL1_PCM,
 		.codec_dai_name = MT_SOC_CODEC_I2S0TXDAI_NAME,
+		.codec_name = MT_SOC_CODEC_NAME,
+		.init = mt_soc_audio_init,
+		.ops = &mt_machine_audio_ops,
+	},
+	{
+		.name = "DEEP_BUFFER_DL_OUTPUT",
+		.stream_name = MT_SOC_DEEP_BUFFER_DL_STREAM_NAME,
+		.cpu_dai_name   = "snd-soc-dummy-dai",
+		.platform_name  = MT_SOC_DEEP_BUFFER_DL_PCM,
+		.codec_dai_name = MT_SOC_CODEC_DEEPBUFFER_TX_DAI_NAME,
 		.codec_name = MT_SOC_CODEC_NAME,
 		.init = mt_soc_audio_init,
 		.ops = &mt_machine_audio_ops,

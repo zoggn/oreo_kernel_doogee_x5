@@ -639,7 +639,7 @@ static int Audio_DL2_DataTransfer(struct snd_kcontrol *kcontrol,
 	void *addr =  (void *)ucontrol->value.integer.value[0];
 #endif
 
-	uint32 size =  ucontrol->value.integer.value[1];
+	unsigned int size =  ucontrol->value.integer.value[1];
 
 	/* pr_warn("%s(), addr %p, size %d\n", __func__, addr, size); */
 
@@ -648,6 +648,42 @@ static int Audio_DL2_DataTransfer(struct snd_kcontrol *kcontrol,
 }
 
 #endif
+
+static int Audio_LowLatencyDebug_Get(struct snd_kcontrol *kcontrol,
+				struct snd_ctl_elem_value *ucontrol)
+{
+	ucontrol->value.integer.value[0] = get_LowLatencyDebug();
+	return 0;
+}
+
+static int Audio_LowLatencyDebug_Set(struct snd_kcontrol *kcontrol,
+				struct snd_ctl_elem_value *ucontrol)
+{
+	set_LowLatencyDebug(ucontrol->value.integer.value[0]);
+	return 0;
+}
+
+static int Audio_AssignDRAM_Get(struct snd_kcontrol *kcontrol,
+				struct snd_ctl_elem_value *ucontrol)
+{
+	pr_debug("%s()\n", __func__);
+	ucontrol->value.integer.value[0] = 0;
+	return 0;
+}
+
+static int Audio_AssignDRAM_Set(struct snd_kcontrol *kcontrol,
+				struct snd_ctl_elem_value *ucontrol)
+{
+	uint32 value = ucontrol->value.integer.value[0];
+
+	pr_debug("%s(), meminterface %d\n", __func__, value);
+	if (value < Soc_Aud_Digital_Block_NUM_OF_MEM_INTERFACE) {
+		struct AFE_MEM_CONTROL_T *pMemControl = Get_Mem_ControlT(value);
+
+		pMemControl->mAssignDRAM = true;
+	}
+	return 0;
+}
 
 /* static struct snd_dma_buffer *Dl1_Playback_dma_buf  = NULL; */
 
@@ -782,11 +818,11 @@ static const struct soc_enum Audio_Routing_Enum[] = {
 };
 
 static const struct snd_kcontrol_new Audio_snd_routing_controls[] = {
-	SOC_ENUM_EXT("Audio_SideGen_Switch", Audio_Routing_Enum[0], Audio_SideGen_Get,
+	SOC_ENUM_EXT("Audio_SineGen_Switch", Audio_Routing_Enum[0], Audio_SideGen_Get,
 		     Audio_SideGen_Set),
-	SOC_ENUM_EXT("Audio_SideGen_SampleRate", Audio_Routing_Enum[1],
+	SOC_ENUM_EXT("Audio_SineGen_SampleRate", Audio_Routing_Enum[1],
 		     Audio_SideGen_SampleRate_Get, Audio_SideGen_SampleRate_Set),
-	SOC_ENUM_EXT("Audio_SideGen_Amplitude", Audio_Routing_Enum[2], Audio_SideGen_Amplitude_Get,
+	SOC_ENUM_EXT("Audio_SineGen_Amplitude", Audio_Routing_Enum[2], Audio_SideGen_Amplitude_Get,
 		     Audio_SideGen_Amplitude_Set),
 	SOC_ENUM_EXT("Audio_Sidetone_Switch", Audio_Routing_Enum[3], Audio_SideTone_Get,
 		     Audio_SideTone_Set),
@@ -807,6 +843,10 @@ static const struct snd_kcontrol_new Audio_snd_routing_controls[] = {
 	SOC_DOUBLE_EXT("Audio_DL2_DataTransfer", SND_SOC_NOPM, 0, 1, 65536, 0,
 	NULL, Audio_DL2_DataTransfer),
 #endif
+	SOC_SINGLE_EXT("Audio_LowLatency_Debug", SND_SOC_NOPM, 0, 0x20000, 0,
+	Audio_LowLatencyDebug_Get, Audio_LowLatencyDebug_Set),
+	SOC_SINGLE_EXT("Audio_Assign_DRAM", SND_SOC_NOPM, 0, 0x20000, 0,
+	Audio_AssignDRAM_Get, Audio_AssignDRAM_Set),
 };
 
 

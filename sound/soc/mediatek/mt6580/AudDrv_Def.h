@@ -40,6 +40,7 @@
 #define AUDIO_DEF_H
 
 #include "AudDrv_Type_Def.h"
+#include <mt-plat/aee.h>
 
 #ifndef CONFIG_FPGA_EARLY_PORTING
 #define PM_MANAGER_API
@@ -49,7 +50,7 @@
 /* #define AUDIO_64BYTE_ALIGN */
 
 /* below for audio debugging */
-#define DEBUG_AUDDRV
+/* #define DEBUG_AUDDRV */
 /* #define DEBUG_AFE_REG */
 /* #define DEBUG_ANA_REG */
 /* #define DEBUG_AUD_CLK */
@@ -164,6 +165,8 @@
 /* if need assert , use AUDIO_ASSERT(true) */
 #define AUDIO_ASSERT(value) BUG_ON(false)
 
+#define AUDIO_AEE(message) \
+	(aee_kernel_exception_api(__FILE__, __LINE__, DB_OPT_FTRACE, message, "audio dump ftrace"))
 
 /**********************************
  *  Other Definitions             *
@@ -250,6 +253,7 @@
 #define MT_SOC_I2S0_PCM  "mt-soc-i2s0-pcm"
 #define MT_SOC_MRGRX_PCM  "mt-soc-mrgrx-pcm"
 #define MT_SOC_I2S0DL1_PCM  "mt-soc-i2s0dl1-pcm"
+#define MT_SOC_DEEP_BUFFER_DL_PCM   "mt-soc-deep-buffer-dl-pcm"
 #define MT_SOC_MODDAI_PCM   "mt-soc-MODDAI-pcm"
 #define MT_SOC_VOICE_MD1  "mt-soc-voicemd1"
 #define MT_SOC_VOICE_MD2  "mt-soc-voicemd2"
@@ -277,6 +281,7 @@
 #define MT_SOC_CODEC_RXDAI2_NAME "mt-soc-codec-rx-dai2"
 #define MT_SOC_CODEC_I2S0AWB_NAME "mt-soc-codec-i2s0awb-dai"
 #define MT_SOC_CODEC_I2S0TXDAI_NAME "mt-soc-codec-I2s0tx-dai"
+#define MT_SOC_CODEC_DEEPBUFFER_TX_DAI_NAME "mt-soc-codec-deepbuffer-tx-dai"
 #define MT_SOC_CODEC_DL1AWBDAI_NAME "mt-soc-codec-dl1awb-dai"
 #define MT_SOC_CODEC_VOICE_MD1DAI_NAME "mt-soc-codec-voicemd1-dai"
 #define MT_SOC_CODEC_VOICE_MD2DAI_NAME "mt-soc-codec-voicemd2-dai"
@@ -320,6 +325,7 @@
 #define MT_SOC_HDMI_STREAM_NAME "HMDI_PLayback"
 #define MT_SOC_I2S0_STREAM_NAME "I2S0_PLayback"
 #define MT_SOC_I2SDL1_STREAM_NAME "I2S0DL1_PLayback"
+#define MT_SOC_DEEP_BUFFER_DL_STREAM_NAME "Deep_Buffer_PLayback"
 #define MT_SOC_MRGRX_STREAM_NAME "MRGRX_PLayback"
 #define MT_SOC_MRGRX_CAPTURE_STREAM_NAME "MRGRX_CAPTURE"
 #define MT_SOC_FM_I2S2_STREAM_NAME "FM_I2S2_PLayback"

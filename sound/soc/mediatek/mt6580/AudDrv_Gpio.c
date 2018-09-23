@@ -275,20 +275,21 @@ int AudDrv_aw8736_mode_ctrl(int mode)
 }
 #endif
 // End of Vanzo:yuntaohe
+
 int AudDrv_GPIO_EXTAMP_Select(int bEnable)
 {
 	int retval = 0;
 
 	if (bEnable == 1) {
 		if (aud_gpios[GPIO_EXTAMP_HIGH].gpio_prepare) {
-        #ifdef AW8736_MODE_CTRL
+          #ifdef AW8736_MODE_CTRL
             retval = AudDrv_aw8736_mode_ctrl(AW8736_MODE);
-        #else
+          #else
 			retval =
 			    pinctrl_select_state(pinctrlaud, aud_gpios[GPIO_EXTAMP_HIGH].gpioctrl);
 			if (retval)
 				pr_err("could not set aud_gpios[GPIO_EXTAMP_HIGH] pins\n");
-        #endif
+          #endif
 		}
 	} else {
 		if (aud_gpios[GPIO_EXTAMP_LOW].gpio_prepare) {
