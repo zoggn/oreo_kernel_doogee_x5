@@ -94,6 +94,10 @@ LCM_DRIVER *lcm_driver_list[] = {
 #if defined(HX8394A_HD720_DSI_VDO_TIANMA_V2)
 	&hx8394a_hd720_dsi_vdo_tianma_v2_lcm_drv,
 #endif
+    
+#if defined(HX8394D_CMI50_BLJ_HD)
+	&hx8394d_cmi50_blj_hd_lcm_drv,
+#endif
 
 #if defined(OTM1283A)
 	&otm1283a_6589_hd_dsi,

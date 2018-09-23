@@ -97,6 +97,7 @@ extern LCM_DRIVER gn_ssd2825_smd_s6e8aa;
 #endif
 extern LCM_DRIVER nt35517_dsi_vdo_lcm_drv;
 extern LCM_DRIVER hx8369_dsi_bld_lcm_drv;
+extern LCM_DRIVER hx8394d_cmi50_blj_hd_lcm_drv;
 extern LCM_DRIVER hx8369_dsi_tm_lcm_drv;
 extern LCM_DRIVER otm1280a_hd720_dsi_cmd_drv;
 extern LCM_DRIVER otm8018b_dsi_vdo_lcm_drv;
