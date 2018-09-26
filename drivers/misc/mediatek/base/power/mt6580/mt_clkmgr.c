@@ -4074,7 +4074,7 @@ static void mt_clks_init(void)
 	clk_writel(CLK_GATING_CTRL2,
 		(clk_readl(CLK_GATING_CTRL2) | NFI_BUS_SW_CG_BIT));
 	clk_writel(CLK_GATING_CTRL1,
-        clk_readl(CLK_GATING_CTRL1) | NFI_SW_CG_BIT | NFIECC_SW_CG_BIT | NFI2X_SW_CG_BIT |
+        (clk_readl(CLK_GATING_CTRL1) | NFI_SW_CG_BIT | NFIECC_SW_CG_BIT | NFI2X_SW_CG_BIT |
 		MSDC1_SW_CG_BIT));
 
 	/* init CG_CLK */
