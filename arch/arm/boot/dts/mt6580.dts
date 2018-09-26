@@ -1084,10 +1084,6 @@
 		lcm: lcm {
 			compatible = "mediatek,mt6580-lcm";
 		};
-		
-        lcm_mode: lcm_mode {
-            compatible = "mediatek,lcm_mode";
-        };
 
 		nfc:nfc {
 			compatible = "mediatek,nfc-gpio-v2";
@@ -1430,18 +1426,10 @@
 		mtkfb: mtkfb@0 {
 			compatible = "mediatek,mtkfb";
 		};
-        flashlightgpio:gpio_flashlight{
-			compatible = "mediatek,gpio_flashlight";
-		};
-        hct_finger: hct_finger{
-           compatible  = "mediatek,hct_finger";
-        };
+
 		dsi_te: dsi_te {
 			compatible = "mediatek, dsi_te-eint";
 		};
-        breathlight:breathlight_drv {
-            compatible = "mediatek,breathlight";
-        };
 
 	};
 

@@ -40,9 +40,6 @@ LCM_DRIVER *lcm_driver_list[] = {
 #if defined(OTM1284A_HD720_DSI_VDO_TM)
 	&otm1284a_hd720_dsi_vdo_tm_lcm_drv,
 #endif
-#if defined(OTM1283A_CMI50_TPS65132_HD)
-	&otm1283a_cmi50_tps65132_hd_lcm_drv,
-#endif
 #if defined(OTM1285A_HD720_DSI_VDO_TM)
 	&otm1285a_hd720_dsi_vdo_tm_lcm_drv,
 #endif
@@ -51,10 +48,6 @@ LCM_DRIVER *lcm_driver_list[] = {
 	&nt35595_fhd_dsi_cmd_truly_8163_lcm_drv,
 #endif
 
-#if defined(NT35521_BOE50_BLJ_HD)
-    &nt35521_boe50_blj_hd_lcm_drv,
-#endif
-    
 #if defined(NT35523_WXGA_DSI_VDO_8163)
 	&nt35523_wxga_dsi_vdo_8163_lcm_drv,
 #endif
@@ -93,10 +86,6 @@ LCM_DRIVER *lcm_driver_list[] = {
 
 #if defined(HX8394A_HD720_DSI_VDO_TIANMA_V2)
 	&hx8394a_hd720_dsi_vdo_tianma_v2_lcm_drv,
-#endif
-    
-#if defined(HX8394D_CMI50_BLJ_HD)
-	&hx8394d_cmi50_blj_hd_lcm_drv,
 #endif
 
 #if defined(OTM1283A)
@@ -137,10 +126,6 @@ LCM_DRIVER *lcm_driver_list[] = {
 	&ili9806e_dsi_vdo_fwvga_drv,
 #endif
 
-#if defined(ILI9881C_AUO50_XZX_HD)
-    &ili9881c_auo50_xzx_hd_lcm_drv,
-#endif
-    
 #if defined(ILI9806E_DSI_VDO_TCL_BLU5039)
 	&ili9806e_dsi_vdo_tcl_blu5039_drv,
 #endif
@@ -931,18 +916,6 @@ LCM_DRIVER *lcm_driver_list[] = {
 	&otm1906b_fhd_dsi_cmd_jdi_tps65132_lcm_drv,
 #endif
 
-#if defined(JD9365_INX50_JMG_HD)
-    &jd9365_inx50_jmg_hd_lcm_drv,
-#endif
-
-#if defined(RM68200_TM50_XLD_HD)
-    &rm68200_tm50_xld_hd_lcm_drv,
-#endif
-
-#if defined(RM68200_CPT50_BLJ_HD)
-    &rm68200_cpt50_blj_hd_lcm_drv,
-#endif
-    
 #if defined(OTM1906B_FHD_DSI_CMD_JDI_TPS65132_MT6797)
 	&otm1906b_fhd_dsi_cmd_jdi_tps65132_mt6797_lcm_drv,
 #endif

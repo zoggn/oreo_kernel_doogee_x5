@@ -280,7 +280,7 @@ static void __gpt_set_mode(struct gpt_device *dev, unsigned int mode)
 
 	mt_reg_sync_writel(ctl, dev->base_addr + GPT_CON);
 
-	dev->mode = mode;
+	dev->mode = mode >> GPT_OPMODE_OFFSET;
 }
 
 static void __gpt_set_clk(struct gpt_device *dev, unsigned int clksrc, unsigned int clkdiv)
@@ -785,8 +785,13 @@ static void __init mt_gpt_init(struct device_node *node)
 
 	gpt_devs_init();
 
-	for (i = 0; i < NR_GPTS; i++)
+	for (i = 0; i < NR_GPTS; i++) {
+		#ifdef CONFIG_TRUSTY
+			if (i == GPT_SYSCNT_ID)
+				continue;
+		#endif
 		__gpt_reset(&gpt_devs[i]);
+	}
 
 	setup_clksrc(freq);
 	setup_irq(xgpt_timers.tmr_irq, &gpt_irq);

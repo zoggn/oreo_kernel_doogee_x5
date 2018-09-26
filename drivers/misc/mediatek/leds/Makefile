@@ -10,4 +10,3 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/leds/$(CONFIG_MTK_PLATFORM)
 endif
 obj-y += $(subst ",,$(CONFIG_MTK_PLATFORM))/
 
-obj-$(CONFIG_LED_BREATHLIGHT_AW2013) += aw2013/

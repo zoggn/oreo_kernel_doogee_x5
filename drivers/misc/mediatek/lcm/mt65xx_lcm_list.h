@@ -17,7 +17,6 @@
 #include <lcm_drv.h>
 
 extern LCM_DRIVER otm1282a_hd720_dsi_vdo_60hz_lcm_drv;
-extern LCM_DRIVER otm1283a_cmi50_tps65132_hd_lcm_drv;
 extern LCM_DRIVER otm1282a_hd720_dsi_vdo_lcm_drv;
 extern LCM_DRIVER nt35595_fhd_dsi_cmd_truly_8163_lcm_drv;
 extern LCM_DRIVER nt35523_wxga_dsi_vdo_8163_lcm_drv;
@@ -47,9 +46,6 @@ extern LCM_DRIVER hx8369b_wvga_dsi_vdo_drv;
 extern LCM_DRIVER hx8389b_qhd_dsi_vdo_drv;
 extern LCM_DRIVER hx8369_hvga_lcm_drv;
 extern LCM_DRIVER ili9481_lcm_drv;
-extern LCM_DRIVER ili9881c_auo50_xzx_hd_lcm_drv;
-extern LCM_DRIVER rm68200_tm50_xld_hd_lcm_drv;
-extern LCM_DRIVER rm68200_cpt50_blj_hd_lcm_drv;
 extern LCM_DRIVER nt35582_lcm_drv;
 extern LCM_DRIVER s6d0170_lcm_drv;
 extern LCM_DRIVER spfd5461a_lcm_drv;
@@ -79,8 +75,6 @@ extern LCM_DRIVER nt35510_dsi_cmd_6572_qvga_drv;
 extern LCM_DRIVER nt35510_dsi_vdo_6572_drv;
 extern LCM_DRIVER nt35510_dpi_6572_lcm_drv;
 extern LCM_DRIVER nt35510_mcu_6572_lcm_drv;
-extern LCM_DRIVER nt35521_boe50_blj_hd_lcm_drv;
-extern LCM_DRIVER jd9365_inx50_jmg_hd_lcm_drv;
 extern LCM_DRIVER nt51012_hd720_dsi_vdo_lcm_drv;
 extern LCM_DRIVER r63303_idisplay_lcm_drv;
 extern LCM_DRIVER hj080ia_lcm_drv;
@@ -97,7 +91,6 @@ extern LCM_DRIVER gn_ssd2825_smd_s6e8aa;
 #endif
 extern LCM_DRIVER nt35517_dsi_vdo_lcm_drv;
 extern LCM_DRIVER hx8369_dsi_bld_lcm_drv;
-extern LCM_DRIVER hx8394d_cmi50_blj_hd_lcm_drv;
 extern LCM_DRIVER hx8369_dsi_tm_lcm_drv;
 extern LCM_DRIVER otm1280a_hd720_dsi_cmd_drv;
 extern LCM_DRIVER otm8018b_dsi_vdo_lcm_drv;
