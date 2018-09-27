@@ -65,7 +65,6 @@ char mtk_ccm_name[camera_info_size] = { 0 };
 #define PROC_CAMERA_INFOS "driver/camera_infos"
 #define camera_infos_size 128
 char g_cam_infos[camera_infos_size] = {0};
-#define FEATURE_CONTROL_MAX_DATA_SIZE 128000
 
 static unsigned int gDrvIndex;
 int cntPWROnMain = 0;
@@ -2203,11 +2202,6 @@ static inline int adopt_CAMERA_HW_FeatureControl(void *pBuf)
 		PK_ERR(" ioctl copy from user failed\n");
 		return -EFAULT;
 	}
-	/* data size exam */
-	if (FeatureParaLen > FEATURE_CONTROL_MAX_DATA_SIZE) {
-		PK_ERR(" exceed data size limitation\n");
-		return -EFAULT;
-	}
 
 	pFeaturePara = kmalloc(FeatureParaLen, GFP_KERNEL);
 	if (NULL == pFeaturePara) {
@@ -2901,9 +2895,14 @@ static inline int kdSetSensorMclk(int *pBuf)
 	PK_DBG("[CAMERA SENSOR] kdSetSensorMclk on=%d, freq= %d\n", pSensorCtrl->on,
 	       pSensorCtrl->freq);
 	if (1 == pSensorCtrl->on) {
+		enable_mux(MT_CLKMUX_CAM_MUX_SEL, "CAMERA_SENSOR");
+		enable_mux(MT_CLKMUX_SCAM_MUX_SEL, "CAMERA_SENSOR");
 		clkmux_sel(MT_CLKMUX_CAM_MUX_SEL,
 			   pSensorCtrl->freq == MCLK_48MHZ_GROUP ? CAM_PLL_48MHZ : CAM_PLL_52MHZ,
 			   "CAMERA_SENSOR");
+	} else {
+		disable_mux(MT_CLKMUX_SCAM_MUX_SEL, "CAMERA_SENSOR");
+		disable_mux(MT_CLKMUX_CAM_MUX_SEL, "CAMERA_SENSOR");
 	}
 	return ret;
 /* #endif */
@@ -3603,7 +3602,7 @@ static long CAMERA_HW_Ioctl(struct file *a_pstFile,
 		break;
 
 	case KDIMGSENSORIOC_X_SET_SHUTTER_GAIN_WAIT_DONE:
-		/* i4RetValue = kdSensorSetExpGainWaitDone((int *)pBuff); */
+		i4RetValue = kdSensorSetExpGainWaitDone((int *)pBuff);
 		break;
 
 	case KDIMGSENSORIOC_X_SET_CURRENT_SENSOR:
@@ -3679,9 +3678,6 @@ static int CAMERA_HW_Open(struct inode *a_pstInode, struct file *a_pstFile)
 
 	/*  */
 	atomic_inc(&g_CamDrvOpenCnt);
-	enable_mux(MT_CLKMUX_CAM_MUX_SEL, "CAMERA_SENSOR");
-	enable_mux(MT_CLKMUX_SCAM_MUX_SEL, "CAMERA_SENSOR");
-
 	return 0;
 }
 
@@ -3698,8 +3694,6 @@ static int CAMERA_HW_Release(struct inode *a_pstInode, struct file *a_pstFile)
 	atomic_dec(&g_CamDrvOpenCnt);
 	/* if (atomic_read(&g_CamDrvOpenCnt) == 0) */
 	checkPowerBeforeClose(CAMERA_HW_DRVNAME1);
-	disable_mux(MT_CLKMUX_SCAM_MUX_SEL, "CAMERA_SENSOR");
-	disable_mux(MT_CLKMUX_CAM_MUX_SEL, "CAMERA_SENSOR");
 
 	return 0;
 }
