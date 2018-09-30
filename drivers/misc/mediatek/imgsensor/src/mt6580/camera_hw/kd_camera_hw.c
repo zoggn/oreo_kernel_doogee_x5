@@ -501,7 +501,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 
 			mdelay(10);
 
-			if (TRUE != _hwPowerOn(VCAMD, VOL_1200)) {
+			if (TRUE != _hwPowerOn(VCAMD, VOL_1500)) {
 				PK_DBG
 				    ("[CAMERA SENSOR] Fail to enable digital power (VCAM_D),power id = %d\n",
 				     VCAMD);
