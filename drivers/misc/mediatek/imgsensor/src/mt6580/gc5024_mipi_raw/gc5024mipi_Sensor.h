@@ -21,12 +21,12 @@
 #endif
 //#define IMAGE_HV_MIRROR 
 
-#ifdef IMAGE_NORMAL
+#ifdef IMAGE_NORMAL_MIRROR
 #define MIRROR 		  0xd4
 #define PH_SWITCH 	  0x1b
 #define BLK_VAL_H 	  0x3c
 #define BLK_VAL_L 	  0x00
-#define STARTX 		  0x0b
+#define STARTX 		  0x0d
 #define STARTY 		  0x03
 #endif
 
@@ -44,7 +44,7 @@
 #define PH_SWITCH 	  0x1b
 #define BLK_VAL_H 	  0x00
 #define BLK_VAL_L 	  0x3c
-#define STARTX 		  0x0b
+#define STARTX 		  0x0d
 #define STARTY 		  0x02
 #endif
 
