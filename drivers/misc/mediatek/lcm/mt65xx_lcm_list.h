@@ -47,6 +47,8 @@ extern LCM_DRIVER hx8369b_wvga_dsi_vdo_drv;
 extern LCM_DRIVER hx8389b_qhd_dsi_vdo_drv;
 extern LCM_DRIVER hx8369_hvga_lcm_drv;
 extern LCM_DRIVER ili9481_lcm_drv;
+extern LCM_DRIVER ili9806e_hlt_hd720_dsi_lcm_drv;
+extern LCM_DRIVER ili9881c_hd720_m8_prj_ht16_kl_lt_v9_lcm_drv;
 extern LCM_DRIVER ili9881c_auo50_xzx_hd_lcm_drv;
 extern LCM_DRIVER rm68200_tm50_xld_hd_lcm_drv;
 extern LCM_DRIVER rm68200_cpt50_blj_hd_lcm_drv;

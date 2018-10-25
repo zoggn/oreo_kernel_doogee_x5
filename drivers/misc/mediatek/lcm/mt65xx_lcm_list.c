@@ -137,6 +137,14 @@ LCM_DRIVER *lcm_driver_list[] = {
 	&ili9806e_dsi_vdo_fwvga_drv,
 #endif
 
+#if defined(ILI9881C_HD720_M8_PRJ_HT16_KL_LT_V9)
+	&ili9881c_hd720_m8_prj_ht16_kl_lt_v9_lcm_drv,
+#endif
+
+#if defined(ILI9806E_HLT_HD720_DSI)   
+    &ili9806e_hlt_hd720_dsi_lcm_drv,
+#endif
+    
 #if defined(ILI9881C_AUO50_XZX_HD)
     &ili9881c_auo50_xzx_hd_lcm_drv,
 #endif
