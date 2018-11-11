@@ -50,6 +50,10 @@ LCM_DRIVER *lcm_driver_list[] = {
 #if defined(NT35595_FHD_DSI_CMD_TRULY_8163)
 	&nt35595_fhd_dsi_cmd_truly_8163_lcm_drv,
 #endif
+    
+#if defined(NT35521_HD720_DSI_M8_PRJ_H16)
+    &nt35521_hd720_dsi_m8_prj_h16_lcm_drv,
+#endif
 
 #if defined(NT35521_BOE50_BLJ_HD)
     &nt35521_boe50_blj_hd_lcm_drv,
