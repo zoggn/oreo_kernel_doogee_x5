@@ -1779,27 +1779,32 @@ static int mxc400x_i2c_probe(struct i2c_client *client, const struct i2c_device_
 {
 	struct i2c_client *new_client;
 	struct mxc400x_i2c_data *obj;
-
-	int err = 0;
-
 	struct acc_control_path ctl={0};
 	struct acc_data_path data={0};
+	int err = 0;
+
+
 	GSE_DEBUG_FUNC();
 	GSE_INFO("driver version = %s\n",DRIVER_VERSION);
 
-	if(!(obj = kzalloc(sizeof(*obj), GFP_KERNEL)))
+	obj = kzalloc(sizeof(*obj), GFP_KERNEL);
+	if(!obj)
 	{
 		err = -ENOMEM;
 		goto exit;
 	}
+	GSE_ERR("mxc400x_i2c_probe-dts_func-node-name=%s\n", client->dev.of_node->name);
 
-	memset(obj, 0, sizeof(struct mxc400x_i2c_data));
+	err = get_accel_dts_func(client->dev.of_node, &obj->hw);
+	if (err < 0) {
+		GSE_ERR("get dts info fail\n");
+		return -1;
+	}
 
-	obj->hw = hw;
-	atomic_set(&obj->layout, obj->hw->direction);
-	if((err = hwmsen_get_convert(obj->hw->direction, &obj->cvt)))
+	err = hwmsen_get_convert(obj->hw.direction, &obj->cvt);
+	if(err)
 	{
-		GSE_ERR("invalid direction: %d\n", obj->hw->direction);
+		GSE_ERR("invalid direction: %d\n", obj->hw.direction);
 		goto exit;
 	}
 
@@ -1813,13 +1818,13 @@ static int mxc400x_i2c_probe(struct i2c_client *client, const struct i2c_device_
 
 
 #ifdef CONFIG_MXC400X_LOWPASS
-	if(obj->hw->firlen > C_MAX_FIR_LENGTH)
+	if(obj->hw.firlen > C_MAX_FIR_LENGTH)
 	{
 		atomic_set(&obj->firlen, C_MAX_FIR_LENGTH);
 	}
 	else
 	{
-		atomic_set(&obj->firlen, obj->hw->firlen);
+		atomic_set(&obj->firlen, obj->hw.firlen);
 	}
 
 	if(atomic_read(&obj->firlen) > 0)
@@ -1830,19 +1835,20 @@ static int mxc400x_i2c_probe(struct i2c_client *client, const struct i2c_device_
 #endif
 	mxc400x_i2c_client = new_client;
 
-	if((err = mxc400x_init_client(new_client, 1)))
-	{
+	err = mxc400x_init_client(new_client, 1);
+	if(err)
 		goto exit_init_failed;
-	}
 
 
-	if((err = misc_register(&mxc400x_device)))
+	err = misc_register(&mxc400x_device);
+	if(err)
 	{
 		GSE_ERR("mxc400x_device register failed\n");
 		goto exit_misc_device_register_failed;
 	}
 
-	if((err = mxc400x_create_attr(&mxc400x_init_info.platform_diver_addr->driver)))
+	err = mxc400x_create_attr(&mxc400x_init_info.platform_diver_addr->driver);
+	if(err)
 	{
 		GSE_ERR("create attribute err = %d\n", err);
 		goto exit_create_attr_failed;
@@ -1857,7 +1863,7 @@ static int mxc400x_i2c_probe(struct i2c_client *client, const struct i2c_device_
 	if(err)
 	{
 		GSE_ERR("register acc control path err\n");
-		goto exit_kfree;
+		goto exit_create_attr_failed;
 	}
 
 	data.get_data = mxc400x_get_data;
@@ -1866,7 +1872,7 @@ static int mxc400x_i2c_probe(struct i2c_client *client, const struct i2c_device_
 	if(err)
 	{
 		GSE_ERR("register acc data path err\n");
-		goto exit_kfree;
+		goto exit_create_attr_failed;
 	}
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -1883,9 +1889,10 @@ exit_create_attr_failed:
 	misc_deregister(&mxc400x_device);
 exit_misc_device_register_failed:
 exit_init_failed:
-exit_kfree:
 	kfree(obj);
 exit:
+	obj = NULL;
+	obj_i2c_data = NULL;
 	GSE_ERR("%s: err = %d\n", __func__, err);
 	mxc400x_init_flag = -1;
 	return err;
@@ -1935,24 +1942,15 @@ static int mxc400x_local_init(void)
 static int mxc400x_remove(void)
 {
 	 GSE_DEBUG_FUNC();
-	 mxc400x_power(hw, 0);
 	 i2c_del_driver(&mxc400x_i2c_driver);
 	 return 0;
 }
 
 static int __init mxc400x_driver_init(void)
 {
-   	
-	const char *name = "mediatek,cust_mxc400x";
-
 	GSE_DEBUG_FUNC();
-	hw = get_accel_dts_func(name, hw);
-	if (!hw)
-		GSE_ERR("get dts info fail\n");
 
 	acc_driver_add(&mxc400x_init_info);
-
-	mutex_init(&mxc400x_mutex);
 
 	return 0;
 }
@@ -1960,13 +1958,12 @@ static int __init mxc400x_driver_init(void)
 static void __exit mxc400x_driver_exit(void)
 {
 	GSE_DEBUG_FUNC();
-	mutex_destroy(&mxc400x_mutex);
 }
 
 module_init(mxc400x_driver_init);
 module_exit(mxc400x_driver_exit);
 
 
-MODULE_AUTHOR("Lyon Miao<xlmiao@memsic.com>");
+MODULE_AUTHOR("zoggn:2K18");
 MODULE_DESCRIPTION("MEMSIC MXC400x Accelerometer Sensor Driver");
 MODULE_LICENSE("GPL");
